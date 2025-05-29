@@ -1,0 +1,350 @@
+<?php
+
+namespace OpenAIBundle\Entity;
+
+use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\Mapping as ORM;
+use OpenAIBundle\Enum\RoleEnum;
+use OpenAIBundle\Repository\MessageRepository;
+use Symfony\Component\Serializer\Attribute\Groups;
+use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
+use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
+use Tourze\DoctrineTimestampBundle\Attribute\CreateTimeColumn;
+use Tourze\DoctrineTimestampBundle\Attribute\UpdateTimeColumn;
+use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
+use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
+use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
+use Tourze\EasyAdmin\Attribute\Column\ListColumn;
+use Tourze\EasyAdmin\Attribute\Field\FormField;
+use Tourze\EasyAdmin\Attribute\Filter\Filterable;
+use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
+
+#[AsPermission(title: 'AI消息')]
+#[ORM\Entity(repositoryClass: MessageRepository::class)]
+#[ORM\Table(name: 'ims_open_ai_message', options: ['comment' => 'AI消息'])]
+class Message implements \Stringable
+{
+    #[ExportColumn]
+    #[ListColumn(order: -1, sorter: true)]
+    #[Groups(['restful_read', 'admin_curd', 'recursive_view', 'api_tree'])]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
+    #[ORM\CustomIdGenerator(SnowflakeIdGenerator::class)]
+    #[ORM\Column(type: Types::BIGINT, nullable: false, options: ['comment' => 'ID'])]
+    private ?string $id = null;
+
+    #[ListColumn]
+    #[FormField]
+    #[ORM\Column(type: Types::STRING, length: 120, unique: true, options: ['comment' => '消息ID'])]
+    private string $msgId;
+
+    #[ORM\ManyToOne(targetEntity: Conversation::class, inversedBy: 'messages')]
+    #[ORM\JoinColumn(name: 'conversation_id', nullable: false, onDelete: 'CASCADE')]
+    private ?Conversation $conversation = null;
+
+    #[ListColumn]
+    #[FormField]
+    #[ORM\Column(type: Types::STRING, length: 20, enumType: RoleEnum::class, options: ['comment' => '角色'])]
+    private RoleEnum $role = RoleEnum::user;
+
+    #[ListColumn]
+    #[FormField]
+    #[ORM\Column(type: Types::TEXT, options: ['comment' => '消息内容'])]
+    private string $content;
+
+    #[FormField]
+    #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '推理过程'])]
+    private ?string $reasoningContent = null;
+
+    #[FormField]
+    #[ORM\Column(type: Types::JSON, nullable: true, options: ['comment' => '工具调用'])]
+    private ?array $toolCalls = null;
+
+    #[FormField]
+    #[ORM\Column(type: Types::STRING, length: 50, nullable: true, options: ['comment' => '工具调用ID'])]
+    private ?string $toolCallId = null;
+
+    #[ListColumn]
+    #[FormField]
+    #[ORM\Column(type: Types::STRING, length: 50, options: ['comment' => '使用模型'])]
+    private string $model;
+
+    #[ListColumn]
+    #[FormField]
+    #[ORM\Column(type: Types::INTEGER, options: ['comment' => '输入令牌数'])]
+    private int $promptTokens = 0;
+
+    #[ListColumn]
+    #[FormField]
+    #[ORM\Column(type: Types::INTEGER, options: ['comment' => '输出令牌数'])]
+    private int $completionTokens = 0;
+
+    #[ListColumn]
+    #[FormField]
+    #[ORM\Column(type: Types::INTEGER, options: ['comment' => '总令牌数'])]
+    private int $totalTokens = 0;
+
+    #[ListColumn(title: '使用密钥')]
+    #[ORM\ManyToOne(inversedBy: 'messages')]
+    private ?ApiKey $apiKey = null;
+
+    #[CreatedByColumn]
+    #[Groups(['restful_read'])]
+    #[ORM\Column(nullable: true, options: ['comment' => '创建人'])]
+    private ?string $createdBy = null;
+
+    #[UpdatedByColumn]
+    #[Groups(['restful_read'])]
+    #[ORM\Column(nullable: true, options: ['comment' => '更新人'])]
+    private ?string $updatedBy = null;
+
+    #[Filterable]
+    #[IndexColumn]
+    #[ListColumn(order: 98, sorter: true)]
+    #[ExportColumn]
+    #[CreateTimeColumn]
+    #[Groups(['restful_read', 'admin_curd', 'restful_read'])]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '创建时间'])]
+    private ?\DateTimeInterface $createTime = null;
+
+    #[UpdateTimeColumn]
+    #[ListColumn(order: 99, sorter: true)]
+    #[Groups(['restful_read', 'admin_curd', 'restful_read'])]
+    #[Filterable]
+    #[ExportColumn]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '更新时间'])]
+    private ?\DateTimeInterface $updateTime = null;
+
+    public function __toString(): string
+    {
+        return $this->content;
+    }
+
+    public function getId(): ?string
+    {
+        return $this->id;
+    }
+
+    public function setCreatedBy(?string $createdBy): self
+    {
+        $this->createdBy = $createdBy;
+
+        return $this;
+    }
+
+    public function getCreatedBy(): ?string
+    {
+        return $this->createdBy;
+    }
+
+    public function setUpdatedBy(?string $updatedBy): self
+    {
+        $this->updatedBy = $updatedBy;
+
+        return $this;
+    }
+
+    public function getUpdatedBy(): ?string
+    {
+        return $this->updatedBy;
+    }
+
+    public function getMsgId(): string
+    {
+        return $this->msgId;
+    }
+
+    public function setMsgId(string $msgId): self
+    {
+        $this->msgId = $msgId;
+
+        return $this;
+    }
+
+    public function getConversation(): Conversation
+    {
+        return $this->conversation;
+    }
+
+    public function setConversation(?Conversation $conversation): self
+    {
+        $this->conversation = $conversation;
+
+        return $this;
+    }
+
+    public function getRole(): RoleEnum
+    {
+        return $this->role;
+    }
+
+    public function setRole(RoleEnum $role): self
+    {
+        $this->role = $role;
+
+        return $this;
+    }
+
+    public function getContent(): string
+    {
+        return $this->content;
+    }
+
+    public function setContent(string $content): self
+    {
+        $this->content = $content;
+
+        return $this;
+    }
+
+    public function appendContent(string $content): void
+    {
+        $this->content .= $content;
+    }
+
+    public function getReasoningContent(): ?string
+    {
+        return $this->reasoningContent;
+    }
+
+    public function setReasoningContent(?string $reasoningContent): self
+    {
+        $this->reasoningContent = $reasoningContent;
+
+        return $this;
+    }
+
+    public function appendReasoningContent(string $content): void
+    {
+        $this->reasoningContent .= $content;
+    }
+
+    public function getModel(): string
+    {
+        return $this->model;
+    }
+
+    public function setModel(string $model): self
+    {
+        $this->model = $model;
+
+        return $this;
+    }
+
+    public function getToolCalls(): ?array
+    {
+        return $this->toolCalls;
+    }
+
+    public function setToolCalls(?array $toolCalls): self
+    {
+        $this->toolCalls = $toolCalls;
+
+        return $this;
+    }
+
+    public function addToolCall(array $call): void
+    {
+        if (null === $this->toolCalls) {
+            $this->toolCalls = [];
+        }
+        $this->toolCalls[] = $call;
+    }
+
+    public function getToolCallId(): ?string
+    {
+        return $this->toolCallId;
+    }
+
+    public function setToolCallId(?string $toolCallId): self
+    {
+        $this->toolCallId = $toolCallId;
+
+        return $this;
+    }
+
+    public function getPromptTokens(): int
+    {
+        return $this->promptTokens;
+    }
+
+    public function setPromptTokens(int $promptTokens): self
+    {
+        $this->promptTokens = $promptTokens;
+
+        return $this;
+    }
+
+    public function getCompletionTokens(): int
+    {
+        return $this->completionTokens;
+    }
+
+    public function setCompletionTokens(int $completionTokens): self
+    {
+        $this->completionTokens = $completionTokens;
+
+        return $this;
+    }
+
+    public function getTotalTokens(): int
+    {
+        return $this->totalTokens;
+    }
+
+    public function setTotalTokens(int $totalTokens): self
+    {
+        $this->totalTokens = $totalTokens;
+
+        return $this;
+    }
+
+    public function toArray(): array
+    {
+        $result = [
+            'role' => $this->role->value,
+            'content' => $this->content,
+        ];
+
+        if (null !== $this->toolCalls) {
+            $result['tool_calls'] = $this->toolCalls;
+        }
+        if (null !== $this->toolCallId) {
+            $result['tool_call_id'] = $this->toolCallId;
+        }
+
+        return $result;
+    }
+
+    public function getApiKey(): ?ApiKey
+    {
+        return $this->apiKey;
+    }
+
+    public function setApiKey(?ApiKey $apiKey): static
+    {
+        $this->apiKey = $apiKey;
+
+        return $this;
+    }
+
+    public function setCreateTime(?\DateTimeInterface $createdAt): void
+    {
+        $this->createTime = $createdAt;
+    }
+
+    public function getCreateTime(): ?\DateTimeInterface
+    {
+        return $this->createTime;
+    }
+
+    public function setUpdateTime(?\DateTimeInterface $updateTime): void
+    {
+        $this->updateTime = $updateTime;
+    }
+
+    public function getUpdateTime(): ?\DateTimeInterface
+    {
+        return $this->updateTime;
+    }
+}

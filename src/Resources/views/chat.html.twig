@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.9.0/languages/javascript.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.9.0/languages/python.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.9.0/languages/php.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.9.0/styles/github.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link href="{{ asset('bundles/openai/css/chat.css') }}" rel="stylesheet">
+    <script>
+        // 将角色数据直接输出到页面
+        window.CHARACTERS = {{ characters|map(char => {
+            'id': char.id,
+            'name': char.name,
+            'prompt': char.systemPrompt,
+            'avatar': char.avatar ?? ('https://api.dicebear.com/7.x/bottts/svg?seed=' ~ char.name),
+            'temperature': char.temperature,
+            'topP': char.topP,
+            'maxTokens': char.maxTokens,
+            'presencePenalty': char.presencePenalty,
+            'frequencyPenalty': char.frequencyPenalty
+        })|json_encode|raw }};
+
+        // 添加 API Keys 数据
+        window.API_KEYS = {{ api_keys|map(key => {
+            'id': key.id,
+            'title': key.title,
+            'model': key.model,
+            'functionCalling': key.functionCalling
+        })|json_encode|raw }};
+    </script>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="sidebar">
+            <div class="new-chat-btn">
+                <button>
+                    <i class="ri-add-line"></i>
+                    <span>新建对话</span>
+                </button>
+            </div>
+            <div class="chat-settings">
+                <div class="settings-item">
+                    <label>API Key:</label>
+                    <select class="api-key-select">
+                        {% for key in api_keys %}
+                        <option value="{{ key.id }}" data-model="{{ key.model }}">{{ key.title }} ({{ key.model }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="chat-list">
+                <!-- Chat items will be rendered here -->
+            </div>
+        </div>
+        <div class="main-chat">
+            <div class="welcome-screen">
+                <h1>选择一个助手开始对话</h1>
+                <div class="role-grid">
+                    {% for char in characters %}
+                    <div class="role-card" data-role-id="{{ char.id }}">
+                        <div class="role-icon">
+                            <img src="{{ char.avatar ?? ('https://api.dicebear.com/7.x/bottts/svg?seed=' ~ char.name) }}" alt="{{ char.name }}">
+                        </div>
+                        <h3>{{ char.name }}</h3>
+                        <p>{{ char.description ?? char.systemPrompt }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="chat-messages" style="display: none;">
+                <!-- Messages will be rendered here -->
+            </div>
+            <div class="input-area" style="display: none;">
+                <form class="input-box">
+                    <textarea placeholder="输入消息，Enter 发送，Shift+Enter 换行" rows="1"></textarea>
+                    <button type="submit">
+                        <i class="ri-send-plane-fill"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <style>
+        .chat-settings {
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #f5f5f5;
+        }
+        .settings-item {
+            margin-bottom: 10px;
+        }
+        .settings-item:last-child {
+            margin-bottom: 0;
+        }
+        .settings-item label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+            font-size: 12px;
+        }
+        .settings-item select {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            font-size: 14px;
+        }
+        .settings-item select:disabled {
+            background: #f5f5f5;
+            cursor: not-allowed;
+        }
+    </style>
+    <script src="{{ asset('bundles/openai/js/chat.js') }}"></script>
+</body>
+</html>
