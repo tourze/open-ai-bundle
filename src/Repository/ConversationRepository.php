@@ -4,7 +4,6 @@ namespace OpenAIBundle\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-use DoctrineEnhanceBundle\Repository\CommonRepositoryAware;
 use OpenAIBundle\Entity\Conversation;
 
 /**
@@ -15,8 +14,6 @@ use OpenAIBundle\Entity\Conversation;
  */
 class ConversationRepository extends ServiceEntityRepository
 {
-    use CommonRepositoryAware;
-
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Conversation::class);
