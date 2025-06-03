@@ -59,7 +59,7 @@ class ChoiceVO
      */
     public function getDecodeToolCalls(): array
     {
-        dump($this->delta);
+//        dump($this->delta);
         $result = [];
         foreach ($this->delta['tool_calls'] ?? [] as $item) {
             // ID是必须要有的

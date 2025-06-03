@@ -2,49 +2,43 @@
 
 namespace OpenAIBundle\Service;
 
-use OpenAIBundle\Controller\Admin\ApiKeyCrudController;
-use OpenAIBundle\Controller\Admin\CharacterCrudController;
-use OpenAIBundle\Controller\Admin\ConversationCrudController;
-use OpenAIBundle\Controller\Admin\MessageCrudController;
-use Tourze\EasyAdmin\Event\MenuBuilderEvent;
+use Knp\Menu\ItemInterface;
+use OpenAIBundle\Entity\ApiKey;
+use OpenAIBundle\Entity\Character;
+use OpenAIBundle\Entity\Conversation;
+use OpenAIBundle\Entity\Message;
+use Tourze\EasyAdminMenuBundle\Service\LinkGeneratorInterface;
+use Tourze\EasyAdminMenuBundle\Service\MenuProviderInterface;
 
-class AdminMenu
+class AdminMenu implements MenuProviderInterface
 {
-    public function buildMenu(MenuBuilderEvent $event): void
+    public function __construct(
+        private readonly LinkGeneratorInterface $linkGenerator,
+    )
     {
-        $menu = $event->getMenu();
+    }
 
-        $openAiMenu = $menu->addChild('OpenAI', [
+    public function __invoke(ItemInterface $item): void
+    {
+        $openAiMenu = $item->addChild('OpenAI', [
             'label' => 'OpenAI',
             'icon' => 'fas fa-robot',
         ]);
 
-        $openAiMenu->addChild('API密钥', [
-            'route' => 'open_ai_api_key',
-            'routeParameters' => ['crudAction' => 'index'],
-            'icon' => 'fas fa-key',
-            'controller' => ApiKeyCrudController::class,
-        ]);
+        $openAiMenu->addChild('API密钥')
+            ->setUri($this->linkGenerator->getCurdListPage(ApiKey::class))
+            ->setAttribute('icon', 'fas fa-key');
 
-        $openAiMenu->addChild('AI角色', [
-            'route' => 'open_ai_character',
-            'routeParameters' => ['crudAction' => 'index'],
-            'icon' => 'fas fa-user-robot',
-            'controller' => CharacterCrudController::class,
-        ]);
+        $openAiMenu->addChild('AI角色')
+            ->setUri($this->linkGenerator->getCurdListPage(Character::class))
+            ->setAttribute('icon', 'fas fa-user-robot');
 
-        $openAiMenu->addChild('对话管理', [
-            'route' => 'open_ai_conversation',
-            'routeParameters' => ['crudAction' => 'index'],
-            'icon' => 'fas fa-comments',
-            'controller' => ConversationCrudController::class,
-        ]);
+        $openAiMenu->addChild('对话管理')
+            ->setUri($this->linkGenerator->getCurdListPage(Conversation::class))
+            ->setAttribute('icon', 'fas fa-comments');
 
-        $openAiMenu->addChild('消息记录', [
-            'route' => 'open_ai_message',
-            'routeParameters' => ['crudAction' => 'index'],
-            'icon' => 'fas fa-message',
-            'controller' => MessageCrudController::class,
-        ]);
+        $openAiMenu->addChild('消息记录')
+            ->setUri($this->linkGenerator->getCurdListPage(Message::class))
+            ->setAttribute('icon', 'fas fa-message');
     }
-} 
+}
