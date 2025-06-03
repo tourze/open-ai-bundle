@@ -2,6 +2,7 @@
 
 namespace OpenAIBundle\Controller\Admin;
 
+use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminCrud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -21,7 +22,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Filter\DateTimeFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\EntityFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\TextFilter;
 use OpenAIBundle\Entity\Character;
-use Tourze\EasyAdmin\Attribute\AdminCrud;
 
 #[AdminCrud(routePath: '/open-ai/character', routeName: 'open_ai_character')]
 class CharacterCrudController extends AbstractCrudController

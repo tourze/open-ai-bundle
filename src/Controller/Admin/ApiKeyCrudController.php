@@ -2,6 +2,7 @@
 
 namespace OpenAIBundle\Controller\Admin;
 
+use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminCrud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -19,7 +20,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Filter\TextFilter;
 use OpenAIBundle\Entity\ApiKey;
 use OpenAIBundle\Enum\ContextLength;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
-use Tourze\EasyAdmin\Attribute\AdminCrud;
 
 #[AdminCrud(routePath: '/open-ai/api-key', routeName: 'open_ai_api_key')]
 class ApiKeyCrudController extends AbstractCrudController

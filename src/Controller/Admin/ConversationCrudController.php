@@ -2,6 +2,7 @@
 
 namespace OpenAIBundle\Controller\Admin;
 
+use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminCrud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -18,7 +19,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Filter\DateTimeFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\EntityFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\TextFilter;
 use OpenAIBundle\Entity\Conversation;
-use Tourze\EasyAdmin\Attribute\AdminCrud;
 
 #[AdminCrud(routePath: '/open-ai/conversation', routeName: 'open_ai_conversation')]
 class ConversationCrudController extends AbstractCrudController
