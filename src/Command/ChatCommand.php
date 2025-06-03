@@ -90,9 +90,9 @@ HELP
             throw ConfigurationException::characterNotActive($characterId);
         }
 
+        $apiKeyId = (string)$input->getOption('api-key');
         $apiKey = $character->getPreferredApiKey();
         if (!$apiKey) {
-            $apiKeyId = $input->getOption('api-key');
             if (!$apiKeyId) {
                 $output->writeln('<error>请使用 -k 或 --api-key 选项指定 API密钥 ID</error>');
 
