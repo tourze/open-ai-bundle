@@ -13,19 +13,11 @@ use Tourze\DoctrineTimestampBundle\Attribute\CreateTimeColumn;
 use Tourze\DoctrineTimestampBundle\Attribute\UpdateTimeColumn;
 use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
 use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
-use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
-use Tourze\EasyAdmin\Attribute\Column\ListColumn;
-use Tourze\EasyAdmin\Attribute\Field\FormField;
-use Tourze\EasyAdmin\Attribute\Filter\Filterable;
-use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
 
-#[AsPermission(title: 'AI消息')]
 #[ORM\Entity(repositoryClass: MessageRepository::class)]
 #[ORM\Table(name: 'ims_open_ai_message', options: ['comment' => 'AI消息'])]
 class Message implements \Stringable
 {
-    #[ExportColumn]
-    #[ListColumn(order: -1, sorter: true)]
     #[Groups(['restful_read', 'admin_curd', 'recursive_view', 'api_tree'])]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
@@ -33,8 +25,6 @@ class Message implements \Stringable
     #[ORM\Column(type: Types::BIGINT, nullable: false, options: ['comment' => 'ID'])]
     private ?string $id = null;
 
-    #[ListColumn]
-    #[FormField]
     #[ORM\Column(type: Types::STRING, length: 120, unique: true, options: ['comment' => '消息ID'])]
     private string $msgId;
 
@@ -42,49 +32,33 @@ class Message implements \Stringable
     #[ORM\JoinColumn(name: 'conversation_id', nullable: false, onDelete: 'CASCADE')]
     private ?Conversation $conversation = null;
 
-    #[ListColumn]
-    #[FormField]
     #[ORM\Column(type: Types::STRING, length: 20, enumType: RoleEnum::class, options: ['comment' => '角色'])]
     private RoleEnum $role = RoleEnum::user;
 
-    #[ListColumn]
-    #[FormField]
     #[ORM\Column(type: Types::TEXT, options: ['comment' => '消息内容'])]
     private string $content;
 
-    #[FormField]
     #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '推理过程'])]
     private ?string $reasoningContent = null;
 
-    #[FormField]
     #[ORM\Column(type: Types::JSON, nullable: true, options: ['comment' => '工具调用'])]
     private ?array $toolCalls = null;
 
-    #[FormField]
     #[ORM\Column(type: Types::STRING, length: 50, nullable: true, options: ['comment' => '工具调用ID'])]
     private ?string $toolCallId = null;
 
-    #[ListColumn]
-    #[FormField]
     #[ORM\Column(type: Types::STRING, length: 50, options: ['comment' => '使用模型'])]
     private string $model;
 
-    #[ListColumn]
-    #[FormField]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => '输入令牌数'])]
     private int $promptTokens = 0;
 
-    #[ListColumn]
-    #[FormField]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => '输出令牌数'])]
     private int $completionTokens = 0;
 
-    #[ListColumn]
-    #[FormField]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => '总令牌数'])]
     private int $totalTokens = 0;
 
-    #[ListColumn(title: '使用密钥')]
     #[ORM\ManyToOne(inversedBy: 'messages')]
     private ?ApiKey $apiKey = null;
 
@@ -98,20 +72,14 @@ class Message implements \Stringable
     #[ORM\Column(nullable: true, options: ['comment' => '更新人'])]
     private ?string $updatedBy = null;
 
-    #[Filterable]
     #[IndexColumn]
-    #[ListColumn(order: 98, sorter: true)]
-    #[ExportColumn]
     #[CreateTimeColumn]
     #[Groups(['restful_read', 'admin_curd', 'restful_read'])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '创建时间'])]
     private ?\DateTimeInterface $createTime = null;
 
     #[UpdateTimeColumn]
-    #[ListColumn(order: 99, sorter: true)]
     #[Groups(['restful_read', 'admin_curd', 'restful_read'])]
-    #[Filterable]
-    #[ExportColumn]
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '更新时间'])]
     private ?\DateTimeInterface $updateTime = null;
 
@@ -161,7 +129,7 @@ class Message implements \Stringable
         return $this;
     }
 
-    public function getConversation(): Conversation
+    public function getConversation(): ?Conversation
     {
         return $this->conversation;
     }

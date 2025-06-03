@@ -10,11 +10,13 @@
     "doctrine/doctrine-bundle": "^2.13",
     "doctrine/orm": "^3.0",
     "doctrine/persistence": "^3.1 || ^4",
+    "easycorp/easyadmin-bundle": "^4",
     "psr/log": "^3|^2|^1",
     "symfony/config": "^6.4",
     "symfony/console": "^6.4",
     "symfony/dependency-injection": "^6.4",
     "symfony/doctrine-bridge": "^6.4",
+    "symfony/form": "^6.4",
     "symfony/framework-bundle": "^6.4",
     "symfony/http-client": "^6.4",
     "symfony/http-client-contracts": "^2.5 | ^3.0",
@@ -43,6 +45,11 @@
   "autoload": {
     "psr-4": {
       "OpenAIBundle\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "OpenAIBundle\\Tests\\": "tests/"
     }
   }
 }

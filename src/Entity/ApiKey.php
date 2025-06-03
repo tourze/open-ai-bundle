@@ -15,29 +15,11 @@ use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
 use Tourze\DoctrineTimestampBundle\Attribute\CreateTimeColumn;
 use Tourze\DoctrineTimestampBundle\Attribute\UpdateTimeColumn;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
-use Tourze\EasyAdmin\Attribute\Action\Copyable;
-use Tourze\EasyAdmin\Attribute\Action\Creatable;
-use Tourze\EasyAdmin\Attribute\Action\Deletable;
-use Tourze\EasyAdmin\Attribute\Action\Editable;
-use Tourze\EasyAdmin\Attribute\Column\BoolColumn;
-use Tourze\EasyAdmin\Attribute\Column\CopyColumn;
-use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
-use Tourze\EasyAdmin\Attribute\Column\ListColumn;
-use Tourze\EasyAdmin\Attribute\Field\FormField;
-use Tourze\EasyAdmin\Attribute\Filter\Filterable;
-use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
 
-#[AsPermission(title: 'API密钥')]
-#[Creatable]
-#[Editable]
-#[Deletable]
-#[Copyable]
 #[ORM\Entity(repositoryClass: ApiKeyRepository::class)]
 #[ORM\Table(name: 'ims_open_ai_api_key', options: ['comment' => 'AI服务-API密钥'])]
 class ApiKey implements \Stringable
 {
-    #[ExportColumn]
-    #[ListColumn(order: -1, sorter: true)]
     #[Groups(['restful_read', 'admin_curd', 'recursive_view', 'api_tree'])]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
@@ -45,49 +27,27 @@ class ApiKey implements \Stringable
     #[ORM\Column(type: Types::BIGINT, nullable: false, options: ['comment' => 'ID'])]
     private ?string $id = null;
 
-    #[BoolColumn]
     #[IndexColumn]
     #[TrackColumn]
     #[Groups(['admin_curd', 'restful_read', 'restful_read', 'restful_write'])]
     #[ORM\Column(type: Types::BOOLEAN, nullable: true, options: ['comment' => '有效', 'default' => 0])]
-    #[ListColumn(order: 97)]
-    #[FormField(order: 97)]
     private ?bool $valid = false;
 
-    #[CopyColumn(suffix: '-复制')]
-    #[FormField]
-    #[ListColumn]
     #[ORM\Column(length: 100, options: ['comment' => '密钥标题'])]
     private ?string $title = null;
 
-    #[CopyColumn]
-    #[FormField]
-    #[ListColumn]
     #[ORM\Column(type: 'string', length: 255, options: ['comment' => 'API密钥'])]
     private string $apiKey;
 
-    #[CopyColumn]
-    #[ListColumn]
-    #[FormField]
     #[ORM\Column(length: 120, options: ['comment' => '调用模型'])]
     private string $model;
 
-    #[CopyColumn]
-    #[FormField]
-    #[ListColumn]
     #[ORM\Column(type: Types::STRING, length: 255, options: ['comment' => '聊天补全接口URL'])]
     private string $chatCompletionUrl;
 
-    #[CopyColumn]
-    #[BoolColumn]
-    #[ListColumn]
-    #[FormField]
     #[ORM\Column(nullable: true, options: ['comment' => '支持函数调用'])]
     private ?bool $functionCalling = false;
 
-    #[CopyColumn]
-    #[ListColumn]
-    #[FormField]
     #[ORM\Column(type: Types::INTEGER, nullable: true, enumType: ContextLength::class, options: ['comment' => '上下文长度'])]
     private ?ContextLength $contextLength = null;
 
@@ -98,20 +58,14 @@ class ApiKey implements \Stringable
     #[ORM\OneToMany(targetEntity: Message::class, mappedBy: 'apiKey')]
     private Collection $messages;
 
-    #[Filterable]
     #[IndexColumn]
-    #[ListColumn(order: 98, sorter: true)]
-    #[ExportColumn]
     #[CreateTimeColumn]
     #[Groups(['restful_read', 'admin_curd', 'restful_read'])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '创建时间'])]
     private ?\DateTimeInterface $createTime = null;
 
     #[UpdateTimeColumn]
-    #[ListColumn(order: 99, sorter: true)]
     #[Groups(['restful_read', 'admin_curd', 'restful_read'])]
-    #[Filterable]
-    #[ExportColumn]
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '更新时间'])]
     private ?\DateTimeInterface $updateTime = null;
 
