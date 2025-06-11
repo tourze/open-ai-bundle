@@ -90,7 +90,7 @@ class ConfigurationExceptionTest extends TestCase
         
         try {
             throw new ConfigurationException($message);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->assertEquals($message, $e->getMessage());
             $this->assertInstanceOf(ConfigurationException::class, $e);
         }

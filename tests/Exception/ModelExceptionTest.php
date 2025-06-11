@@ -90,7 +90,7 @@ class ModelExceptionTest extends TestCase
         
         try {
             throw new ModelException($message);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->assertEquals($message, $e->getMessage());
             $this->assertInstanceOf(ModelException::class, $e);
         }

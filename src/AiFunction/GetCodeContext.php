@@ -68,7 +68,7 @@ class GetCodeContext implements AiFunctionInterface
             ];
 
             return json_encode($result, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return json_encode(['error' => $e->getMessage()]);
         }
     }
