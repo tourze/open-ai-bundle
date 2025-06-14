@@ -11,8 +11,6 @@ services:
     resource: '../../Command/'
   OpenAIBundle\Controller\:
     resource: '../../Controller/'
-  OpenAIBundle\EventSubscriber\:
-    resource: '../../EventSubscriber/'
   OpenAIBundle\Procedure\:
     resource: '../../Procedure/'
   OpenAIBundle\Repository\:

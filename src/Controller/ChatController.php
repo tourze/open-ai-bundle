@@ -38,7 +38,7 @@ class ChatController extends AbstractController
         $characters = $this->characterRepository->findBy(['valid' => true]);
         $apiKeys = $this->apiKeyRepository->findBy(['valid' => true]);
 
-        return $this->render('@OpenAi/chat.html.twig', [
+        return $this->render('@OpenAI/chat.html.twig', [
             'characters' => $characters,
             'api_keys' => $apiKeys,
         ]);
