@@ -12,8 +12,6 @@ use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Serializer\Attribute\Ignore;
 use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
 use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
-use Tourze\DoctrineTimestampBundle\Attribute\CreateTimeColumn;
-use Tourze\DoctrineTimestampBundle\Attribute\UpdateTimeColumn;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
 
@@ -38,7 +36,7 @@ class ApiKey implements \Stringable
     #[ORM\Column(length: 100, options: ['comment' => '密钥标题'])]
     private ?string $title = null;
 
-    #[ORM\Column(type: 'string', length: 255, options: ['comment' => 'API密钥'])]
+    #[ORM\Column(type: Types::STRING, length: 255, options: ['comment' => 'API密钥'])]
     private string $apiKey;
 
     #[ORM\Column(length: 120, options: ['comment' => '调用模型'])]
@@ -60,12 +58,7 @@ class ApiKey implements \Stringable
     #[ORM\OneToMany(targetEntity: Message::class, mappedBy: 'apiKey')]
     private Collection $messages;
 
-    #[IndexColumn]
-    #[CreateTimeColumn]
-    #[Groups(['restful_read', 'admin_curd', 'restful_read'])]
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '创建时间'])]#[UpdateTimeColumn]
-    #[Groups(['restful_read', 'admin_curd', 'restful_read'])]
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '更新时间'])]public function __construct()
+    public function __construct()
     {
         $this->messages = new ArrayCollection();
     }

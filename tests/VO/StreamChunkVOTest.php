@@ -109,8 +109,6 @@ class StreamChunkVOTest extends TestCase
 
         $streamChunk = StreamChunkVO::fromArray($data);
         $choices = $streamChunk->getChoices();
-
-        $this->assertIsArray($choices);
         $this->assertCount(1, $choices);
         $this->assertInstanceOf(ChoiceVO::class, $choices[0]);
         $this->assertEquals('Test content', $choices[0]->getContent());

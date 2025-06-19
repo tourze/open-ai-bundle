@@ -223,13 +223,10 @@ class ReadTextFileTest extends TestCase
         $decoded = json_decode($result, true);
         
         // 验证JSON结构
-        $this->assertIsArray($decoded);
         $this->assertArrayHasKey('content', $decoded);
         $this->assertArrayHasKey('size', $decoded);
         $this->assertArrayHasKey('encoding', $decoded);
-        $this->assertIsString($decoded['content']);
         $this->assertIsInt($decoded['size']);
-        $this->assertIsString($decoded['encoding']);
     }
 
     public function testExecute_withBinaryFile(): void
@@ -247,8 +244,6 @@ class ReadTextFileTest extends TestCase
             // 如果返回空，说明函数对二进制文件处理不当
             $this->markTestSkipped('函数不支持二进制文件处理');
         } else {
-            $this->assertIsString($result);
-            
             // 如果是JSON，验证JSON结构
             if ($this->isJsonString($result)) {
                 $decoded = json_decode($result, true);

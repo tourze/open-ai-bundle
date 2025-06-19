@@ -2,7 +2,7 @@
 
 namespace OpenAIBundle\Tests\Entity;
 
-use DateTime;
+use DateTimeImmutable;
 use OpenAIBundle\Entity\ApiKey;
 use OpenAIBundle\Entity\Conversation;
 use OpenAIBundle\Entity\Message;
@@ -423,7 +423,7 @@ class MessageTest extends TestCase
 
     public function testCreateTimeGetterAndSetter(): void
     {
-        $dateTime = new DateTime('2023-01-01 12:00:00');
+        $dateTime = new DateTimeImmutable('2023-01-01 12:00:00');
         $this->message->setCreateTime($dateTime);
         
         $this->assertSame($dateTime, $this->message->getCreateTime());
@@ -438,7 +438,7 @@ class MessageTest extends TestCase
 
     public function testUpdateTimeGetterAndSetter(): void
     {
-        $dateTime = new DateTime('2023-01-02 15:30:00');
+        $dateTime = new DateTimeImmutable('2023-01-02 15:30:00');
         $this->message->setUpdateTime($dateTime);
         
         $this->assertSame($dateTime, $this->message->getUpdateTime());
@@ -549,7 +549,7 @@ class MessageTest extends TestCase
         $this->message->setApiKey($apiKey);
         $this->message->setCreatedBy('user123');
         
-        $createTime = new DateTime();
+        $createTime = new DateTimeImmutable();
         $this->message->setCreateTime($createTime);
         
         // 验证所有属性

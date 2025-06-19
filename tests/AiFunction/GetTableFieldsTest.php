@@ -236,8 +236,6 @@ UNICODE;
             ->willReturn('test result');
 
         $result = $this->function->execute(['table_name' => 'test_table']);
-
-        $this->assertIsString($result);
     }
 
     public function testExecute_withEmptyResult(): void

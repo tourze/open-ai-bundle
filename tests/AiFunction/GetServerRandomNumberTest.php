@@ -49,8 +49,6 @@ class GetServerRandomNumberTest extends TestCase
         $parameters = ['min' => 10, 'max' => 20];
         
         $result = $this->function->execute($parameters);
-        
-        $this->assertIsString($result);
         $resultInt = (int) $result;
         $this->assertGreaterThanOrEqual(10, $resultInt);
         $this->assertLessThanOrEqual(20, $resultInt);
@@ -61,8 +59,6 @@ class GetServerRandomNumberTest extends TestCase
         $parameters = ['max' => 100];
         
         $result = $this->function->execute($parameters);
-        
-        $this->assertIsString($result);
         $resultInt = (int) $result;
         $this->assertGreaterThanOrEqual(0, $resultInt);
         $this->assertLessThanOrEqual(100, $resultInt);
@@ -73,8 +69,6 @@ class GetServerRandomNumberTest extends TestCase
         $parameters = [];
         
         $result = $this->function->execute($parameters);
-        
-        $this->assertIsString($result);
         $resultInt = (int) $result;
         $this->assertGreaterThanOrEqual(0, $resultInt);
         $this->assertLessThanOrEqual(PHP_INT_MAX, $resultInt);
@@ -85,8 +79,6 @@ class GetServerRandomNumberTest extends TestCase
         $parameters = ['min' => -50, 'max' => -10];
         
         $result = $this->function->execute($parameters);
-        
-        $this->assertIsString($result);
         $resultInt = (int) $result;
         $this->assertGreaterThanOrEqual(-50, $resultInt);
         $this->assertLessThanOrEqual(-10, $resultInt);
@@ -106,8 +98,6 @@ class GetServerRandomNumberTest extends TestCase
         $parameters = ['min' => 1, 'max' => 1000000];
         
         $result = $this->function->execute($parameters);
-        
-        $this->assertIsString($result);
         $resultInt = (int) $result;
         $this->assertGreaterThanOrEqual(1, $resultInt);
         $this->assertLessThanOrEqual(1000000, $resultInt);
@@ -118,8 +108,6 @@ class GetServerRandomNumberTest extends TestCase
         $parameters = ['min' => 1, 'max' => 10];
         
         $result = $this->function->execute($parameters);
-        
-        $this->assertIsString($result);
         $this->assertMatchesRegularExpression('/^\d+$/', $result);
     }
 

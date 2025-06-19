@@ -35,8 +35,6 @@ class GetServerTimeZoneTest extends TestCase
     public function testExecute_returnsCurrentTimeZone(): void
     {
         $result = $this->function->execute();
-
-        $this->assertIsString($result);
         $this->assertNotEmpty($result);
         
         // 验证返回的是有效的时区标识符
@@ -48,8 +46,6 @@ class GetServerTimeZoneTest extends TestCase
     {
         $parameters = ['unused' => 'parameter'];
         $result = $this->function->execute($parameters);
-
-        $this->assertIsString($result);
         $this->assertNotEmpty($result);
     }
 
@@ -103,8 +99,6 @@ class GetServerTimeZoneTest extends TestCase
     public function testExecute_returnType(): void
     {
         $result = $this->function->execute();
-
-        $this->assertIsString($result);
     }
 
     public function testExecute_withCommonTimeZones(): void

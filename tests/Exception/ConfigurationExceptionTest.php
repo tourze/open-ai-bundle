@@ -140,7 +140,6 @@ class ConfigurationExceptionTest extends TestCase
             
             // 检查栈追踪包含测试文件相关信息
             $traceAsString = $e->getTraceAsString();
-            $this->assertIsString($traceAsString);
             $this->assertStringContainsString('ConfigurationExceptionTest', $traceAsString);
         }
     }

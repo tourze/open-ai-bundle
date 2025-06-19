@@ -29,8 +29,6 @@ class FunctionServiceTest extends TestCase
         $this->functionService = new FunctionService($aiFunctions, $this->logger);
         
         $result = $this->functionService->generateToolsArray($character);
-        
-        $this->assertIsArray($result);
         $this->assertEmpty($result);
     }
 

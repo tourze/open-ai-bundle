@@ -23,11 +23,12 @@ use Symfony\Component\Console\Question\Question;
 use Symfony\Component\HttpClient\Exception\ClientException;
 
 #[AsCommand(
-    name: 'open-ai:chat',
+    name: self::NAME,
     description: '调用 AI 模型进行对话',
 )]
 class ChatCommand extends Command
 {
+    public const NAME = 'open-ai:chat';
     public function __construct(
         private readonly OpenAiService $openAiService,
         private readonly ApiKeyRepository $apiKeyRepository,
@@ -77,7 +78,7 @@ HELP
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $characterId = $input->getOption('character');
-        if (!$characterId) {
+        if (empty($characterId)) {
             $output->writeln('<error>请使用 -c 或 --character 选项指定角色 ID</error>');
 
             return Command::FAILURE;
@@ -148,7 +149,7 @@ HELP
                     continue;
                 }
 
-                if (!$prompt) {
+                if (empty($prompt)) {
                     $output->writeln('<error>请提供有效的问题内容</error>');
                     continue;
                 }

@@ -97,14 +97,14 @@ class ApiKeyTest extends TestCase
 
     public function test_createTime_canBeSetAndRetrieved(): void
     {
-        $now = new \DateTime();
+        $now = new \DateTimeImmutable();
         $this->apiKey->setCreateTime($now);
         $this->assertEquals($now, $this->apiKey->getCreateTime());
     }
 
     public function test_updateTime_canBeSetAndRetrieved(): void
     {
-        $now = new \DateTime();
+        $now = new \DateTimeImmutable();
         $this->apiKey->setUpdateTime($now);
         $this->assertEquals($now, $this->apiKey->getUpdateTime());
     }

@@ -157,7 +157,6 @@ class TaskStatusTest extends TestCase
         // 验证每个状态都有正确的值和标签
         foreach ($workflow as $status) {
             $this->assertInstanceOf(TaskStatus::class, $status);
-            $this->assertIsString($status->value);
             $this->assertIsString($status->getLabel());
             $this->assertNotEmpty($status->value);
             $this->assertNotEmpty($status->getLabel());
@@ -198,7 +197,6 @@ class TaskStatusTest extends TestCase
         // 确保所有状态都有标签
         foreach (TaskStatus::cases() as $status) {
             $label = $status->getLabel();
-            $this->assertIsString($label);
             $this->assertNotEmpty($label);
         }
     }

@@ -2,7 +2,7 @@
 
 namespace OpenAIBundle\Tests\Entity;
 
-use DateTime;
+use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use OpenAIBundle\Entity\Character;
 use OpenAIBundle\Entity\Conversation;
@@ -296,7 +296,7 @@ class ConversationTest extends TestCase
 
     public function testCreateTimeGetterAndSetter(): void
     {
-        $dateTime = new DateTime('2023-01-01 12:00:00');
+        $dateTime = new DateTimeImmutable('2023-01-01 12:00:00');
         $this->conversation->setCreateTime($dateTime);
         
         $this->assertSame($dateTime, $this->conversation->getCreateTime());
@@ -311,7 +311,7 @@ class ConversationTest extends TestCase
 
     public function testUpdateTimeGetterAndSetter(): void
     {
-        $dateTime = new DateTime('2023-01-02 15:30:00');
+        $dateTime = new DateTimeImmutable('2023-01-02 15:30:00');
         $this->conversation->setUpdateTime($dateTime);
         
         $this->assertSame($dateTime, $this->conversation->getUpdateTime());
@@ -392,8 +392,8 @@ class ConversationTest extends TestCase
 
     public function testTimestampHandling(): void
     {
-        $createTime = new DateTime('2023-01-01 10:00:00');
-        $updateTime = new DateTime('2023-01-01 11:00:00');
+        $createTime = new DateTimeImmutable('2023-01-01 10:00:00');
+        $updateTime = new DateTimeImmutable('2023-01-01 11:00:00');
         
         $this->conversation->setCreateTime($createTime);
         $this->conversation->setUpdateTime($updateTime);

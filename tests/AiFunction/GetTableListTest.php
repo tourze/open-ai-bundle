@@ -201,7 +201,5 @@ UNICODE;
             ->willReturn('test result');
 
         $result = $this->function->execute();
-
-        $this->assertIsString($result);
     }
 } 

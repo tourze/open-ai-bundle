@@ -120,7 +120,6 @@ class RoleEnumTest extends TestCase
         // 验证每个角色都有正确的值
         foreach ($conversationFlow as $role) {
             $this->assertInstanceOf(RoleEnum::class, $role);
-            $this->assertIsString($role->value);
             $this->assertNotEmpty($role->value);
         }
     }

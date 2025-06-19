@@ -159,14 +159,14 @@ class CharacterTest extends TestCase
 
     public function test_createTime_canBeSetAndRetrieved(): void
     {
-        $now = new \DateTime();
+        $now = new \DateTimeImmutable();
         $this->character->setCreateTime($now);
         $this->assertEquals($now, $this->character->getCreateTime());
     }
 
     public function test_updateTime_canBeSetAndRetrieved(): void
     {
-        $now = new \DateTime();
+        $now = new \DateTimeImmutable();
         $this->character->setUpdateTime($now);
         $this->assertEquals($now, $this->character->getUpdateTime());
     }

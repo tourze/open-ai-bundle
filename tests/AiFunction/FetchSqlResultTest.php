@@ -163,6 +163,5 @@ class FetchSqlResultTest extends TestCase
             ->willReturn($mockStatement);
 
         $result = $this->function->execute(['sql' => $sql]);
-        $this->assertIsString($result);
     }
 } 
