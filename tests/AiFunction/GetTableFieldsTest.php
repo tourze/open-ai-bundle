@@ -228,15 +228,6 @@ UNICODE;
         $this->assertInstanceOf(\OpenAIBundle\AiFunction\AiFunctionInterface::class, $this->function);
     }
 
-    public function testExecute_returnType(): void
-    {
-        $this->entityService
-            ->method('getTableFields')
-            ->with('test_table')
-            ->willReturn('test result');
-
-        $result = $this->function->execute(['table_name' => 'test_table']);
-    }
 
     public function testExecute_withEmptyResult(): void
     {

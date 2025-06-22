@@ -96,10 +96,6 @@ class GetServerTimeZoneTest extends TestCase
         $this->assertInstanceOf(\OpenAIBundle\AiFunction\AiFunctionInterface::class, $this->function);
     }
 
-    public function testExecute_returnType(): void
-    {
-        $result = $this->function->execute();
-    }
 
     public function testExecute_withCommonTimeZones(): void
     {

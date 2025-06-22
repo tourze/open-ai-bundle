@@ -8,7 +8,6 @@ use OpenAIBundle\Entity\Character;
 use OpenAIBundle\Entity\Conversation;
 use OpenAIBundle\Entity\Message;
 use OpenAIBundle\Enum\RoleEnum;
-use OpenAIBundle\Repository\ConversationRepository;
 use OpenAIBundle\Service\ConversationService;
 use OpenAIBundle\VO\ChoiceVO;
 use OpenAIBundle\VO\StreamChunkVO;
@@ -19,16 +18,13 @@ use PHPUnit\Framework\TestCase;
 class ConversationServiceTest extends TestCase
 {
     private ConversationService $conversationService;
-    private MockObject $conversationRepository;
     private MockObject $entityManager;
 
     protected function setUp(): void
     {
-        $this->conversationRepository = $this->createMock(ConversationRepository::class);
         $this->entityManager = $this->createMock(EntityManagerInterface::class);
 
         $this->conversationService = new ConversationService(
-            $this->conversationRepository,
             $this->entityManager
         );
     }

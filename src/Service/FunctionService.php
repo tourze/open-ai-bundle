@@ -27,7 +27,8 @@ class FunctionService
 
         foreach ($this->aiFunctions as $aiFunction) {
             /** @var AiFunctionInterface $aiFunction */
-            if ($character->getSupportFunctions() && !in_array($aiFunction->getName(), $character->getSupportFunctions())) {
+            $supportFunctions = $character->getSupportFunctions();
+            if (null !== $supportFunctions && count($supportFunctions) > 0 && !in_array($aiFunction->getName(), $supportFunctions)) {
                 continue;
             }
 

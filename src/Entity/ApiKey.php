@@ -65,7 +65,7 @@ class ApiKey implements \Stringable
 
     public function __toString(): string
     {
-        if (!$this->getId()) {
+        if (null === $this->getId()) {
             return '';
         }
 

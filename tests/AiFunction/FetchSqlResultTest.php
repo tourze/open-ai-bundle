@@ -151,17 +151,4 @@ class FetchSqlResultTest extends TestCase
         $this->assertInstanceOf(\OpenAIBundle\AiFunction\AiFunctionInterface::class, $this->function);
     }
 
-    public function testExecute_returnType(): void
-    {
-        $sql = 'SELECT 1 as test LIMIT 1';
-        
-        $mockStatement = $this->createMock(\Doctrine\DBAL\Result::class);
-        $mockStatement->method('fetchAllAssociative')->willReturn([['test' => 1]]);
-
-        $this->connection
-            ->method('executeQuery')
-            ->willReturn($mockStatement);
-
-        $result = $this->function->execute(['sql' => $sql]);
-    }
 } 

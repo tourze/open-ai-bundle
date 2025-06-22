@@ -82,12 +82,6 @@ class FunctionParamTypeTest extends TestCase
         $this->assertContains(FunctionParamType::boolean, $types);
     }
 
-    public function testEnumComparison(): void
-    {
-        $this->assertTrue(FunctionParamType::string === FunctionParamType::string);
-        $this->assertFalse(FunctionParamType::string === FunctionParamType::integer);
-        $this->assertFalse(FunctionParamType::integer === FunctionParamType::boolean);
-    }
 
     public function testEnumSerialization(): void
     {

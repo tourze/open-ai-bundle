@@ -97,7 +97,6 @@ class ToolTypeTest extends TestCase
         $toolType = ToolType::function;
         
         $this->assertTrue($toolType->value === 'function');
-        $this->assertFalse($toolType->value === 'tool');
     }
 
     public function testEnumComparison_worksCorrectly(): void

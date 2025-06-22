@@ -136,12 +136,6 @@ class TaskStatusTest extends TestCase
         $this->assertContains(TaskStatus::FAILED, $statuses);
     }
 
-    public function testEnumComparison(): void
-    {
-        $this->assertTrue(TaskStatus::PENDING === TaskStatus::PENDING);
-        $this->assertFalse(TaskStatus::PENDING === TaskStatus::RUNNING);
-        $this->assertFalse(TaskStatus::COMPLETED === TaskStatus::FAILED);
-    }
 
     public function testTaskStatusWorkflow(): void
     {
@@ -157,7 +151,6 @@ class TaskStatusTest extends TestCase
         // 验证每个状态都有正确的值和标签
         foreach ($workflow as $status) {
             $this->assertInstanceOf(TaskStatus::class, $status);
-            $this->assertIsString($status->getLabel());
             $this->assertNotEmpty($status->value);
             $this->assertNotEmpty($status->getLabel());
         }

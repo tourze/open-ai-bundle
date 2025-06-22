@@ -49,22 +49,24 @@ class AnalyzeCodeStructure implements AiFunctionInterface
                         'name' => $method->getName(),
                         'visibility' => $this->getVisibility($method),
                         'parameters' => array_map(function ($param) {
+                            $type = $param->getType();
                             return [
                                 'name' => $param->getName(),
-                                'type' => $param->getType() ? $param->getType()->getName() : 'mixed',
+                                'type' => $type instanceof \ReflectionType ? (string) $type : 'mixed',
                             ];
                         }, $method->getParameters()),
-                        'return_type' => $method->getReturnType() ? $method->getReturnType()->getName() : 'mixed',
+                        'return_type' => $method->getReturnType() instanceof \ReflectionType ? (string) $method->getReturnType() : 'mixed',
                         'doc_comment' => $method->getDocComment(),
                     ];
                 }
 
                 // 分析属性
                 foreach ($reflection->getProperties() as $property) {
+                    $type = $property->getType();
                     $result['properties'][] = [
                         'name' => $property->getName(),
                         'visibility' => $this->getVisibility($property),
-                        'type' => $property->getType() ? $property->getType()->getName() : 'mixed',
+                        'type' => $type instanceof \ReflectionType ? (string) $type : 'mixed',
                         'doc_comment' => $property->getDocComment(),
                     ];
                 }

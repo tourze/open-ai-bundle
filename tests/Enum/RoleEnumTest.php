@@ -90,12 +90,6 @@ class RoleEnumTest extends TestCase
         $this->assertContains(RoleEnum::tool, $roles);
     }
 
-    public function testEnumComparison(): void
-    {
-        $this->assertTrue(RoleEnum::user === RoleEnum::user);
-        $this->assertFalse(RoleEnum::user === RoleEnum::assistant);
-        $this->assertFalse(RoleEnum::system === RoleEnum::tool);
-    }
 
     public function testEnumSerialization(): void
     {

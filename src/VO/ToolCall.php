@@ -27,4 +27,14 @@ class ToolCall
     {
         return $this->functionArguments;
     }
+
+    public function getIndex(): string
+    {
+        return $this->index;
+    }
+
+    public function getType(): string
+    {
+        return $this->type;
+    }
 }

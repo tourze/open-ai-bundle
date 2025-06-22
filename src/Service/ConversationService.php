@@ -8,7 +8,6 @@ use OpenAIBundle\Entity\Character;
 use OpenAIBundle\Entity\Conversation;
 use OpenAIBundle\Entity\Message;
 use OpenAIBundle\Enum\RoleEnum;
-use OpenAIBundle\Repository\ConversationRepository;
 use OpenAIBundle\VO\ChoiceVO;
 use OpenAIBundle\VO\StreamChunkVO;
 use OpenAIBundle\VO\UsageVO;
@@ -17,7 +16,6 @@ use Symfony\Component\Uid\Uuid;
 class ConversationService
 {
     public function __construct(
-        private readonly ConversationRepository $conversationRepository,
         private readonly EntityManagerInterface $entityManager,
     ) {
     }
@@ -122,7 +120,7 @@ class ConversationService
         $foundMessage = $this->appendAssistantMessage($conversation, $apiKey, $chunk->getMsgId());
 
         // 附加 tool_calls
-        if ($choice->getToolCalls()) {
+        if (null !== $choice->getToolCalls()) {
             foreach ($choice->getToolCalls() as $toolCall) {
                 $foundMessage->addToolCall($toolCall);
             }
@@ -187,7 +185,7 @@ class ConversationService
             $message = $item;
         }
 
-        if (!$message) {
+        if (null === $message) {
             $message = new Message();
             $message->setApiKey($apiKey);
             $message->setModel($apiKey->getModel());

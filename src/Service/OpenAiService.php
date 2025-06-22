@@ -136,4 +136,9 @@ class OpenAiService
             'timeout' => 60,
         ];
     }
+
+    public function getSupportedModels(): array
+    {
+        return self::SUPPORTED_MODELS;
+    }
 }

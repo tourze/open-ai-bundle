@@ -124,7 +124,6 @@ class ToolCallTest extends TestCase
             $stringArgs
         );
 
-        $this->assertIsArray($toolCall->getFunctionArguments());
         $this->assertEquals('Hello, world!', $toolCall->getFunctionArguments()['text']);
         $this->assertEquals('en', $toolCall->getFunctionArguments()['language']);
     }

@@ -2,7 +2,11 @@
 
 namespace OpenAIBundle\Service;
 
-use OpenAIBundle\Controller\ChatController;
+use OpenAIBundle\Controller\ChatCreateController;
+use OpenAIBundle\Controller\ChatIndexController;
+use OpenAIBundle\Controller\ConversationChatController;
+use OpenAIBundle\Controller\ConversationMessagesController;
+use OpenAIBundle\Controller\ConversationPageController;
 use Symfony\Bundle\FrameworkBundle\Routing\AttributeRouteControllerLoader;
 use Symfony\Component\Config\Loader\Loader;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
@@ -28,7 +32,11 @@ class AttributeControllerLoader extends Loader implements RoutingAutoLoaderInter
     public function autoload(): RouteCollection
     {
         $collection = new RouteCollection();
-        $collection->addCollection($this->controllerLoader->load(ChatController::class));
+        $collection->addCollection($this->controllerLoader->load(ChatIndexController::class));
+        $collection->addCollection($this->controllerLoader->load(ChatCreateController::class));
+        $collection->addCollection($this->controllerLoader->load(ConversationPageController::class));
+        $collection->addCollection($this->controllerLoader->load(ConversationMessagesController::class));
+        $collection->addCollection($this->controllerLoader->load(ConversationChatController::class));
         return $collection;
     }
 

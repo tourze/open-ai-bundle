@@ -28,6 +28,6 @@ class GetServerRandomNumber implements AiFunctionInterface
         $result = rand($parameters['min'] ?? 0, $parameters['max'] ?? PHP_INT_MAX);
 
         // dump(__METHOD__, $parameters, $result);
-        return $result;
+        return (string) $result;
     }
 }
