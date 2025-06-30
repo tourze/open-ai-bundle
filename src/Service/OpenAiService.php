@@ -4,79 +4,79 @@ namespace OpenAIBundle\Service;
 
 use OpenAIBundle\Entity\ApiKey;
 use OpenAIBundle\VO\StreamChunkVO;
+use OpenAIBundle\VO\StreamRequestOptions;
+use OpenAIBundle\VO\StreamResponseVO;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpClient\NativeHttpClient;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Yiisoft\Json\Json;
 
 class OpenAiService
 {
-    private const SUPPORTED_MODELS = [
-        'deepseek-coder',
-        'deepseek-chat',
-        'deepseek-math',
-        'deepseek-chinese',
-    ];
-
     private const DEFAULT_MODEL = 'deepseek-coder';
 
     private HttpClientInterface $httpClient;
 
-    public function __construct()
+    public function __construct(private readonly LoggerInterface $logger)
     {
         $this->httpClient = new NativeHttpClient();
     }
 
     /**
-     * 流式对话，使用生成器返回响应内容
+     * 非流式对话，直接返回完整响应
      *
-     * @param ApiKey $apiKey   配置
-     * @param array  $messages 历史消息
-     * @param array  $options  选项
+     * @param ApiKey                $apiKey   配置
+     * @param array                 $messages 历史消息
+     * @param StreamRequestOptions $options  选项
      *
-     * @return \Generator<StreamChunkVO|string> 生成器，每次产出一个响应块或调试信息
-     *
-     * @throws \RuntimeException
+     * @return StreamResponseVO 完整的响应对象
      */
-    public function streamReasoner(
+    public function chat(
         ApiKey $apiKey,
-        array $messages = [],
-        array $options = [],
-    ): \Generator {
+        array $messages,
+        StreamRequestOptions $options,
+    ): StreamResponseVO {
         $url = $apiKey->getChatCompletionUrl();
 
-        // 从用户选项中分离出 API 请求选项和调试选项
-        $debug = $options['debug'] ?? false;
-        unset($options['debug']);
-
-        // 验证并设置模型
-        $model = $options['model'] ?? self::DEFAULT_MODEL;
-        unset($options['model']);
-
-        // 合并默认选项和用户提供的选项
-        $requestBody = array_merge([
-            'model' => $model,
-            'messages' => $messages,
-            'temperature' => 0.7,
-            'max_tokens' => 2000,
-            'stream' => true,
-            'stream_options' => [
-                'include_usage' => true,
-            ],
-        ], $options);
+        // 合并消息和选项，生成请求体（非流式不需要 stream 参数）
+        $requestBody = array_merge(
+            ['messages' => $messages],
+            $options->toRequestArray(self::DEFAULT_MODEL),
+            ['stream' => false]
+        );
 
         $requestOptions = $this->getRequestOptions($apiKey, $requestBody);
 
-        // 仅在开发环境显示调试信息
-        if ($debug) {
-            // 为了安全起见，在显示之前移除敏感信息
-            $debugOptions = $requestOptions;
-            $debugOptions['headers']['Authorization'] = 'Bearer ****';
-            yield sprintf(
-                "\n调试信息：\n请求 URL: %s\n请求选项：%s\n",
-                $url,
-                Json::encode($debugOptions, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
-            );
-        }
+        $response = $this->httpClient->request('POST', $url, $requestOptions);
+        
+        $responseData = Json::decode($response->getContent());
+        
+        return StreamResponseVO::fromArray($responseData);
+    }
+
+    /**
+     * 流式对话，使用生成器返回响应内容
+     *
+     * @param ApiKey                     $apiKey   配置
+     * @param array                      $messages 历史消息
+     * @param StreamRequestOptions $options  选项（可以是 VO 对象或数组，数组会自动转换为 VO）
+     *
+     * @return \Generator<StreamChunkVO> 生成器，每次产出一个响应块或调试信息
+     */
+    public function streamReasoner(
+        ApiKey $apiKey,
+        array $messages,
+        StreamRequestOptions $options,
+    ): \Generator {
+        $url = $apiKey->getChatCompletionUrl();
+
+        // 合并消息和选项，生成请求体
+        $requestBody = array_merge(
+            ['messages' => $messages],
+            $options->toRequestArray(self::DEFAULT_MODEL)
+        );
+
+        $requestOptions = $this->getRequestOptions($apiKey, $requestBody);
 
         $response = $this->httpClient->request('POST', $url, $requestOptions);
 
@@ -106,9 +106,6 @@ class OpenAiService
                 try {
                     $data = trim(substr($line, 6)); // Remove 'data: ' prefix
                     if ('[DONE]' === $data) {
-                        if ($debug) {
-                            yield "\n请求结束\n";
-                        }
                         $isDone = true;
                         break;
                     }
@@ -116,9 +113,10 @@ class OpenAiService
                     $decoded = Json::decode($data);
                     yield StreamChunkVO::fromArray($decoded);
                 } catch (\Throwable $e) {
-                    if ($debug) {
-                        yield sprintf("\n解析错误：%s\n", $e);
-                    }
+                    $this->logger->error('流返回遇到异常', [
+                        'exception' => $e,
+                        'key' => $apiKey,
+                    ]);
                     continue;
                 }
             }
@@ -135,10 +133,5 @@ class OpenAiService
             ], $headers),
             'timeout' => 60,
         ];
-    }
-
-    public function getSupportedModels(): array
-    {
-        return self::SUPPORTED_MODELS;
     }
 }

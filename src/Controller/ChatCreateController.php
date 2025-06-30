@@ -20,7 +20,7 @@ class ChatCreateController extends AbstractController
     ) {
     }
 
-    #[Route('/open-ai/chat/create', name: 'open_ai_chat_create', methods: ['POST'])]
+    #[Route(path: '/open-ai/chat/create', name: 'open_ai_chat_create', methods: ['POST'])]
     public function __invoke(Request $request): JsonResponse
     {
         $content = $request->toArray();

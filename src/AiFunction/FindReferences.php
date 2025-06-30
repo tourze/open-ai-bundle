@@ -4,8 +4,9 @@ namespace OpenAIBundle\AiFunction;
 
 use OpenAIBundle\Enum\FunctionParamType;
 use OpenAIBundle\VO\FunctionParam;
+use Tourze\MCPContracts\ToolInterface;
 
-class FindReferences implements AiFunctionInterface
+class FindReferences implements ToolInterface
 {
     public function getName(): string
     {

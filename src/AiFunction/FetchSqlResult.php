@@ -4,9 +4,11 @@ namespace OpenAIBundle\AiFunction;
 
 use Doctrine\DBAL\Connection;
 use OpenAIBundle\Enum\FunctionParamType;
+use OpenAIBundle\Exception\SqlQueryException;
 use OpenAIBundle\VO\FunctionParam;
+use Tourze\MCPContracts\ToolInterface;
 
-class FetchSqlResult implements AiFunctionInterface
+class FetchSqlResult implements ToolInterface
 {
     public function __construct(
         private readonly Connection $connection,
@@ -37,12 +39,12 @@ class FetchSqlResult implements AiFunctionInterface
     {
         $sql = trim($parameters['sql'] ?? '');
         if (empty($sql)) {
-            throw new \InvalidArgumentException('SQL语句不能为空');
+            throw SqlQueryException::emptySql();
         }
 
         // 安全检查：只允许 SELECT 语句
         if (!str_starts_with(strtoupper($sql), 'SELECT ')) {
-            throw new \InvalidArgumentException('仅支持 SELECT 语句');
+            throw SqlQueryException::unsupportedStatement();
         }
 
         //        // 检查是否包含 LIMIT

@@ -17,7 +17,7 @@ class ConversationMessagesController extends AbstractController
     ) {
     }
 
-    #[Route('/open-ai/conversation/{id}/messages', name: 'open_ai_conversation_messages', requirements: ['id' => '\d+'])]
+    #[Route(path: '/open-ai/conversation/{id}/messages', name: 'open_ai_conversation_messages', requirements: ['id' => '\d+'])]
     public function __invoke(Request $request, int $id): JsonResponse
     {
         $conversation = $this->conversationRepository->find($id);
@@ -33,7 +33,7 @@ class ConversationMessagesController extends AbstractController
                 'id' => $message->getId(),
                 'role' => $message->getRole(),
                 'content' => $message->getContent(),
-                'createdAt' => $message->getCreatedAt()->format('Y-m-d H:i:s'),
+                'createdAt' => $message->getCreateTime()?->format('Y-m-d H:i:s'),
             ];
 
             if ($message->getToolCalls()) {

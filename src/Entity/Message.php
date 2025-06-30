@@ -8,6 +8,7 @@ use OpenAIBundle\Enum\RoleEnum;
 use OpenAIBundle\Repository\MessageRepository;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
+use Tourze\DoctrineSnowflakeBundle\Traits\SnowflakeKeyAware;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineUserBundle\Traits\BlameableAware;
 
@@ -17,12 +18,7 @@ class Message implements \Stringable
 {
     use TimestampableAware;
     use BlameableAware;
-    #[Groups(['restful_read', 'admin_curd', 'recursive_view', 'api_tree'])]
-    #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
-    #[ORM\CustomIdGenerator(SnowflakeIdGenerator::class)]
-    #[ORM\Column(type: Types::BIGINT, nullable: false, options: ['comment' => 'ID'])]
-    private ?string $id = null;
+    use SnowflakeKeyAware;
 
     #[ORM\Column(type: Types::STRING, length: 120, unique: true, options: ['comment' => '消息ID'])]
     private string $msgId;
@@ -67,10 +63,6 @@ class Message implements \Stringable
         return $this->content;
     }
 
-    public function getId(): ?string
-    {
-        return $this->id;
-    }
 
 
     public function getMsgId(): string

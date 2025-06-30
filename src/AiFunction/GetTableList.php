@@ -3,8 +3,9 @@
 namespace OpenAIBundle\AiFunction;
 
 use Tourze\DoctrineEntityMarkdownBundle\Service\EntityService;
+use Tourze\MCPContracts\ToolInterface;
 
-class GetTableList implements AiFunctionInterface
+class GetTableList implements ToolInterface
 {
     public const NAME = 'GetTableList';
 

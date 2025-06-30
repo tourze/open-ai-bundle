@@ -148,7 +148,7 @@ class FetchSqlResultTest extends TestCase
 
     public function testFunction_implementsInterface(): void
     {
-        $this->assertInstanceOf(\OpenAIBundle\AiFunction\AiFunctionInterface::class, $this->function);
+        $this->assertInstanceOf(\Tourze\MCPContracts\ToolInterface::class, $this->function);
     }
 
 } 

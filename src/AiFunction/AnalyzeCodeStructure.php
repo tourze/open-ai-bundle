@@ -3,9 +3,11 @@
 namespace OpenAIBundle\AiFunction;
 
 use OpenAIBundle\Enum\FunctionParamType;
+use OpenAIBundle\Exception\CodeAnalysisException;
 use OpenAIBundle\VO\FunctionParam;
+use Tourze\MCPContracts\ToolInterface;
 
-class AnalyzeCodeStructure implements AiFunctionInterface
+class AnalyzeCodeStructure implements ToolInterface
 {
     public function getName(): string
     {
@@ -84,7 +86,7 @@ class AnalyzeCodeStructure implements AiFunctionInterface
         if (preg_match('/namespace\s+([^;]+);.*class\s+([^\s{]+)/s', $content, $matches)) {
             return $matches[1] . '\\' . $matches[2];
         }
-        throw new \RuntimeException('无法从文件中提取类名');
+        throw CodeAnalysisException::classNotFound($filepath);
     }
 
     private function getVisibility($reflection): string

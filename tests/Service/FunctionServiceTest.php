@@ -2,7 +2,6 @@
 
 namespace OpenAIBundle\Tests\Service;
 
-use OpenAIBundle\AiFunction\AiFunctionInterface;
 use OpenAIBundle\Entity\Character;
 use OpenAIBundle\Enum\FunctionParamType;
 use OpenAIBundle\Service\FunctionService;
@@ -10,6 +9,7 @@ use OpenAIBundle\VO\FunctionParam;
 use OpenAIBundle\VO\ToolCall;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Tourze\MCPContracts\ToolInterface;
 
 class FunctionServiceTest extends TestCase
 {
@@ -34,7 +34,7 @@ class FunctionServiceTest extends TestCase
 
     public function testGenerateToolsArray_withSingleFunction(): void
     {
-        $aiFunction = $this->createMock(AiFunctionInterface::class);
+        $aiFunction = $this->createMock(ToolInterface::class);
         $aiFunction->method('getName')->willReturn('test_function');
         $aiFunction->method('getDescription')->willReturn('Test function description');
         $aiFunction->method('getParameters')->willReturn(new \ArrayIterator([]));
@@ -55,12 +55,12 @@ class FunctionServiceTest extends TestCase
 
     public function testGenerateToolsArray_withMultipleFunctions(): void
     {
-        $function1 = $this->createMock(AiFunctionInterface::class);
+        $function1 = $this->createMock(ToolInterface::class);
         $function1->method('getName')->willReturn('function1');
         $function1->method('getDescription')->willReturn('First function');
         $function1->method('getParameters')->willReturn(new \ArrayIterator([]));
         
-        $function2 = $this->createMock(AiFunctionInterface::class);
+        $function2 = $this->createMock(ToolInterface::class);
         $function2->method('getName')->willReturn('function2');
         $function2->method('getDescription')->willReturn('Second function');
         $function2->method('getParameters')->willReturn(new \ArrayIterator([]));
@@ -78,12 +78,12 @@ class FunctionServiceTest extends TestCase
 
     public function testGenerateToolsArray_withSupportFunctionsFilter(): void
     {
-        $function1 = $this->createMock(AiFunctionInterface::class);
+        $function1 = $this->createMock(ToolInterface::class);
         $function1->method('getName')->willReturn('allowed_function');
         $function1->method('getDescription')->willReturn('Allowed function');
         $function1->method('getParameters')->willReturn(new \ArrayIterator([]));
         
-        $function2 = $this->createMock(AiFunctionInterface::class);
+        $function2 = $this->createMock(ToolInterface::class);
         $function2->method('getName')->willReturn('blocked_function');
         $function2->method('getDescription')->willReturn('Blocked function');
         $function2->method('getParameters')->willReturn(new \ArrayIterator([]));
@@ -107,7 +107,7 @@ class FunctionServiceTest extends TestCase
             new FunctionParam('optional_param', FunctionParamType::integer, 'Optional parameter', false),
         ];
         
-        $aiFunction = $this->createMock(AiFunctionInterface::class);
+        $aiFunction = $this->createMock(ToolInterface::class);
         $aiFunction->method('getName')->willReturn('param_function');
         $aiFunction->method('getDescription')->willReturn('Function with parameters');
         $aiFunction->method('getParameters')->willReturn(new \ArrayIterator($parameters));
@@ -128,7 +128,7 @@ class FunctionServiceTest extends TestCase
 
     public function testGenerateToolsArray_withEmptyParameters(): void
     {
-        $aiFunction = $this->createMock(AiFunctionInterface::class);
+        $aiFunction = $this->createMock(ToolInterface::class);
         $aiFunction->method('getName')->willReturn('no_param_function');
         $aiFunction->method('getDescription')->willReturn('Function without parameters');
         $aiFunction->method('getParameters')->willReturn(new \ArrayIterator([]));
@@ -150,7 +150,7 @@ class FunctionServiceTest extends TestCase
 
     public function testInvoke_successfulExecution(): void
     {
-        $aiFunction = $this->createMock(AiFunctionInterface::class);
+        $aiFunction = $this->createMock(ToolInterface::class);
         $aiFunction->method('getName')->willReturn('test_function');
         $aiFunction->method('execute')->willReturn('Function executed successfully');
         
@@ -166,7 +166,7 @@ class FunctionServiceTest extends TestCase
 
     public function testInvoke_functionNotFound(): void
     {
-        $aiFunction = $this->createMock(AiFunctionInterface::class);
+        $aiFunction = $this->createMock(ToolInterface::class);
         $aiFunction->method('getName')->willReturn('existing_function');
         
         $aiFunctions = [$aiFunction];
@@ -181,7 +181,7 @@ class FunctionServiceTest extends TestCase
 
     public function testInvoke_functionThrowsException(): void
     {
-        $aiFunction = $this->createMock(AiFunctionInterface::class);
+        $aiFunction = $this->createMock(ToolInterface::class);
         $aiFunction->method('getName')->willReturn('failing_function');
         $aiFunction->method('execute')->willThrowException(new \RuntimeException('Function execution failed'));
         
@@ -206,7 +206,7 @@ class FunctionServiceTest extends TestCase
 
     public function testInvoke_withComplexParameters(): void
     {
-        $aiFunction = $this->createMock(AiFunctionInterface::class);
+        $aiFunction = $this->createMock(ToolInterface::class);
         $aiFunction->method('getName')->willReturn('complex_function');
         $aiFunction->method('execute')->willReturnCallback(function ($args) {
             return json_encode($args);
@@ -237,7 +237,7 @@ class FunctionServiceTest extends TestCase
             new FunctionParam('bool_param', FunctionParamType::boolean, 'Boolean parameter', false),
         ];
         
-        $aiFunction = $this->createMock(AiFunctionInterface::class);
+        $aiFunction = $this->createMock(ToolInterface::class);
         $aiFunction->method('getName')->willReturn('typed_function');
         $aiFunction->method('getDescription')->willReturn('Function with different parameter types');
         $aiFunction->method('getParameters')->willReturn(new \ArrayIterator($parameters));
@@ -264,11 +264,11 @@ class FunctionServiceTest extends TestCase
 
     public function testMultipleFunctionInvocations(): void
     {
-        $function1 = $this->createMock(AiFunctionInterface::class);
+        $function1 = $this->createMock(ToolInterface::class);
         $function1->method('getName')->willReturn('func1');
         $function1->method('execute')->willReturn('Result from func1');
         
-        $function2 = $this->createMock(AiFunctionInterface::class);
+        $function2 = $this->createMock(ToolInterface::class);
         $function2->method('getName')->willReturn('func2');
         $function2->method('execute')->willReturn('Result from func2');
         
@@ -313,9 +313,9 @@ class FunctionServiceTest extends TestCase
         $this->assertCount(3, $result3); // 修改期望：空数组实际不过滤函数
     }
 
-    private function createMockAiFunction(string $name, string $description): AiFunctionInterface
+    private function createMockAiFunction(string $name, string $description): ToolInterface
     {
-        $aiFunction = $this->createMock(AiFunctionInterface::class);
+        $aiFunction = $this->createMock(ToolInterface::class);
         $aiFunction->method('getName')->willReturn($name);
         $aiFunction->method('getDescription')->willReturn($description);
         $aiFunction->method('getParameters')->willReturn(new \ArrayIterator([]));

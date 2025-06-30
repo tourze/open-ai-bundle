@@ -2,7 +2,9 @@
 
 namespace OpenAIBundle\AiFunction;
 
-class GetServerTimeZone implements AiFunctionInterface
+use Tourze\MCPContracts\ToolInterface;
+
+class GetServerTimeZone implements ToolInterface
 {
     public const NAME = 'GetServerTimeZone';
 

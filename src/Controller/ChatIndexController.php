@@ -16,7 +16,7 @@ class ChatIndexController extends AbstractController
     ) {
     }
 
-    #[Route('/open-ai/chat', name: 'open_ai_chat')]
+    #[Route(path: '/open-ai/chat', name: 'open_ai_chat')]
     public function __invoke(): Response
     {
         $characters = $this->characterRepository->findBy(['valid' => true]);

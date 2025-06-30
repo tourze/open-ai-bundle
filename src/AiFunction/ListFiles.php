@@ -4,8 +4,9 @@ namespace OpenAIBundle\AiFunction;
 
 use OpenAIBundle\Enum\FunctionParamType;
 use OpenAIBundle\VO\FunctionParam;
+use Tourze\MCPContracts\ToolInterface;
 
-class ListFiles implements AiFunctionInterface
+class ListFiles implements ToolInterface
 {
     public function getName(): string
     {

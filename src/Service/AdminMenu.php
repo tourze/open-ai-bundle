@@ -31,7 +31,7 @@ class AdminMenu implements MenuProviderInterface
 
         $openAiMenu->addChild('AI角色')
             ->setUri($this->linkGenerator->getCurdListPage(Character::class))
-            ->setAttribute('icon', 'fas fa-user-robot');
+            ->setAttribute('icon', 'fas fa-user');
 
         $openAiMenu->addChild('对话管理')
             ->setUri($this->linkGenerator->getCurdListPage(Conversation::class))

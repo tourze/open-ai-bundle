@@ -17,7 +17,7 @@ class ConversationPageController extends AbstractController
     ) {
     }
 
-    #[Route('/open-ai/conversation/{id}', name: 'open_ai_conversation', requirements: ['id' => '\d+'])]
+    #[Route(path: '/open-ai/conversation/{id}', name: 'open_ai_conversation', requirements: ['id' => '\d+'])]
     public function __invoke(Request $request, int $id): Response
     {
         $conversation = $this->conversationRepository->find($id);

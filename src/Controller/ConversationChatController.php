@@ -10,8 +10,8 @@ use OpenAIBundle\Exception\ConfigurationException;
 use OpenAIBundle\Repository\ApiKeyRepository;
 use OpenAIBundle\Repository\ConversationRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
 class ConversationChatController extends AbstractController
@@ -23,7 +23,7 @@ class ConversationChatController extends AbstractController
     ) {
     }
 
-    #[Route('/open-ai/conversation/{id}/chat', name: 'open_ai_conversation_chat', requirements: ['id' => '\d+'], methods: ['POST'])]
+    #[Route(path: '/open-ai/conversation/{id}/chat', name: 'open_ai_conversation_chat', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function __invoke(Request $request, int $id): JsonResponse
     {
         $conversation = $this->conversationRepository->find($id);

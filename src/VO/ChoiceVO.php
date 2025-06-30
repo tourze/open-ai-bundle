@@ -15,8 +15,11 @@ class ChoiceVO
 
     public static function fromArray(array $data): self
     {
+        // 处理非流式响应（使用 message 字段）和流式响应（使用 delta 字段）
+        $delta = $data['delta'] ?? $data['message'] ?? [];
+        
         return new self(
-            $data['delta'],
+            $delta,
             $data['finish_reason'] ?? null,
             $data['index'] ?? null
         );
@@ -71,7 +74,7 @@ class ChoiceVO
                 $item['index'],
                 $item['type'],
                 $item['function']['name'],
-                Json::decode($item['function']['arguments']) ?: [],
+                Json::decode($item['function']['arguments']) ?? [],
             );
         }
 

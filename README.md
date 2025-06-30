@@ -51,41 +51,6 @@ php bin/console deepseek:reason -s "你是一个专业的PHP开发者" -c 1
 php bin/console deepseek:reason -m deepseek-chat -c 1
 ```
 
-### 在代码中使用
-
-```php
-use OpenAIBundle\Service\OpenAiService;
-use OpenAIBundle\Repository\ApiKeyRepository;
-
-class YourService
-{
-    public function __construct(
-        private readonly OpenAiService $deepSeekService,
-        private readonly ApiKeyRepository $configRepository
-    ) {
-    }
-
-    public function chat(): void
-    {
-        $config = $this->configRepository->find(1);
-        $messages = [
-            ['role' => 'system', 'content' => '你是一个专业的PHP开发者'],
-            ['role' => 'user', 'content' => '如何使用 Symfony 创建自定义命令？']
-        ];
-
-        foreach ($this->deepSeekService->streamReasoner(
-            $config,
-            $messages,
-            ['model' => 'deepseek-chat']
-        ) as $chunk) {
-            if ($chunk instanceof StreamChunkVO) {
-                echo $chunk->getContent();
-            }
-        }
-    }
-}
-```
-
 ## 异常处理
 
 Bundle 定义了以下异常类：

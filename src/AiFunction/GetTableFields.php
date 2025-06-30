@@ -5,8 +5,9 @@ namespace OpenAIBundle\AiFunction;
 use OpenAIBundle\Enum\FunctionParamType;
 use OpenAIBundle\VO\FunctionParam;
 use Tourze\DoctrineEntityMarkdownBundle\Service\EntityService;
+use Tourze\MCPContracts\ToolInterface;
 
-class GetTableFields implements AiFunctionInterface
+class GetTableFields implements ToolInterface
 {
     public function __construct(
         private readonly EntityService $entityService,
