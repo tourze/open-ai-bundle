@@ -8,10 +8,11 @@ use Tourze\EnumExtra\Labelable;
 use Tourze\EnumExtra\Selectable;
 use Tourze\EnumExtra\SelectTrait;
 
-enum ToolType: string implements Itemable, Labelable, Selectable
+enum ToolType: string implements Labelable, Itemable, Selectable
 {
     use ItemTrait;
     use SelectTrait;
+
     case function = 'function';
 
     public function getLabel(): string

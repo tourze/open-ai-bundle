@@ -8,10 +8,11 @@ use Tourze\EnumExtra\Labelable;
 use Tourze\EnumExtra\Selectable;
 use Tourze\EnumExtra\SelectTrait;
 
-enum FunctionParamType: string implements Itemable, Labelable, Selectable
+enum FunctionParamType: string implements Labelable, Itemable, Selectable
 {
     use ItemTrait;
     use SelectTrait;
+
     case string = 'string';
     case integer = 'integer';
     case boolean = 'boolean';

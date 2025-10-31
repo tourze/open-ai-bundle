@@ -2,10 +2,10 @@
 
 namespace OpenAIBundle\VO;
 
-class StreamResponseVO
+abstract class StreamResponseVO
 {
     /**
-     * @param array<ChoiceVO> $choices
+     * @param array<int, ChoiceVO> $choices
      */
     public function __construct(
         public readonly string $id,
@@ -18,23 +18,10 @@ class StreamResponseVO
     ) {
     }
 
-    public static function fromArray(array $data): self
-    {
-        $choices = array_map(
-            fn (array $choice) => ChoiceVO::fromArray($choice),
-            $data['choices']
-        );
-
-        return new self(
-            $data['id'],
-            $data['created'],
-            $data['model'],
-            $data['system_fingerprint'] ?? '',
-            $data['object'],
-            $choices,
-            isset($data['usage']) ? UsageVO::fromArray($data['usage']) : null
-        );
-    }
+    /**
+     * @param array<string, mixed> $data
+     */
+    abstract public static function fromArray(array $data): self;
 
     public function getPromptTokens(): ?int
     {

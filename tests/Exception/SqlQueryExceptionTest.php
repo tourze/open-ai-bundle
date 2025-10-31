@@ -3,10 +3,20 @@
 namespace OpenAIBundle\Tests\Exception;
 
 use OpenAIBundle\Exception\SqlQueryException;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Tourze\PHPUnitBase\AbstractExceptionTestCase;
 
-class SqlQueryExceptionTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(SqlQueryException::class)]
+final class SqlQueryExceptionTest extends AbstractExceptionTestCase
 {
+    protected function getExceptionClass(): string
+    {
+        return SqlQueryException::class;
+    }
+
     public function testEmptySqlException(): void
     {
         $exception = SqlQueryException::emptySql();
@@ -34,7 +44,7 @@ class SqlQueryExceptionTest extends TestCase
     public function testExceptionExtendsInvalidArgumentException(): void
     {
         $exception = SqlQueryException::emptySql();
-        
+
         $this->assertInstanceOf(\InvalidArgumentException::class, $exception);
     }
 }

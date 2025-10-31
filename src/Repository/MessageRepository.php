@@ -6,7 +6,12 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use OpenAIBundle\Entity\Conversation;
 use OpenAIBundle\Entity\Message;
+use Tourze\PHPUnitSymfonyKernelTest\Attribute\AsRepository;
 
+/**
+ * @extends ServiceEntityRepository<Message>
+ */
+#[AsRepository(entityClass: Message::class)]
 class MessageRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -14,16 +19,41 @@ class MessageRepository extends ServiceEntityRepository
         parent::__construct($registry, Message::class);
     }
 
+    public function save(Message $entity, bool $flush = true): void
+    {
+        $this->getEntityManager()->persist($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function remove(Message $entity, bool $flush = true): void
+    {
+        $this->getEntityManager()->remove($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    /**
+     * @return array<Message>
+     */
     public function findByConversation(Conversation $conversation): array
     {
         return $this->createQueryBuilder('m')
             ->andWhere('m.conversation = :conversation')
             ->setParameter('conversation', $conversation)
-            ->orderBy('m.createdAt', 'ASC')
+            ->orderBy('m.createTime', 'ASC')
             ->getQuery()
-            ->getResult();
+            ->getResult()
+        ;
     }
 
+    /**
+     * @return array{prompt_tokens: int, completion_tokens: int, total_tokens: int}
+     */
     public function getConversationTokenCounts(Conversation $conversation): array
     {
         $result = $this->createQueryBuilder('m')
@@ -35,7 +65,8 @@ class MessageRepository extends ServiceEntityRepository
             ->andWhere('m.conversation = :conversation')
             ->setParameter('conversation', $conversation)
             ->getQuery()
-            ->getSingleResult();
+            ->getSingleResult()
+        ;
 
         return [
             'prompt_tokens' => (int) $result['prompt_tokens'],
@@ -44,6 +75,9 @@ class MessageRepository extends ServiceEntityRepository
         ];
     }
 
+    /**
+     * @return array<Message>
+     */
     public function findByRole(Conversation $conversation, string $role): array
     {
         return $this->createQueryBuilder('m')
@@ -51,20 +85,25 @@ class MessageRepository extends ServiceEntityRepository
             ->andWhere('m.role = :role')
             ->setParameter('conversation', $conversation)
             ->setParameter('role', $role)
-            ->orderBy('m.createdAt', 'ASC')
+            ->orderBy('m.createTime', 'ASC')
             ->getQuery()
-            ->getResult();
+            ->getResult()
+        ;
     }
 
+    /**
+     * @return array<Message>
+     */
     public function findWithToolCalls(Conversation $conversation): array
     {
         return $this->createQueryBuilder('m')
             ->andWhere('m.conversation = :conversation')
             ->andWhere('m.toolCalls IS NOT NULL')
             ->setParameter('conversation', $conversation)
-            ->orderBy('m.createdAt', 'ASC')
+            ->orderBy('m.createTime', 'ASC')
             ->getQuery()
-            ->getResult();
+            ->getResult()
+        ;
     }
 
     public function findByToolCallId(string $toolCallId): ?Message
@@ -73,6 +112,7 @@ class MessageRepository extends ServiceEntityRepository
             ->andWhere('m.toolCallId = :toolCallId')
             ->setParameter('toolCallId', $toolCallId)
             ->getQuery()
-            ->getOneOrNullResult();
+            ->getOneOrNullResult()
+        ;
     }
 }

@@ -10,12 +10,11 @@ use OpenAIBundle\Entity\Message;
 use Tourze\EasyAdminMenuBundle\Service\LinkGeneratorInterface;
 use Tourze\EasyAdminMenuBundle\Service\MenuProviderInterface;
 
-class AdminMenu implements MenuProviderInterface
+readonly class AdminMenu implements MenuProviderInterface
 {
     public function __construct(
-        private readonly LinkGeneratorInterface $linkGenerator,
-    )
-    {
+        private LinkGeneratorInterface $linkGenerator,
+    ) {
     }
 
     public function __invoke(ItemInterface $item): void
@@ -27,18 +26,22 @@ class AdminMenu implements MenuProviderInterface
 
         $openAiMenu->addChild('API密钥')
             ->setUri($this->linkGenerator->getCurdListPage(ApiKey::class))
-            ->setAttribute('icon', 'fas fa-key');
+            ->setAttribute('icon', 'fas fa-key')
+        ;
 
         $openAiMenu->addChild('AI角色')
             ->setUri($this->linkGenerator->getCurdListPage(Character::class))
-            ->setAttribute('icon', 'fas fa-user');
+            ->setAttribute('icon', 'fas fa-user')
+        ;
 
         $openAiMenu->addChild('对话管理')
             ->setUri($this->linkGenerator->getCurdListPage(Conversation::class))
-            ->setAttribute('icon', 'fas fa-comments');
+            ->setAttribute('icon', 'fas fa-comments')
+        ;
 
         $openAiMenu->addChild('消息记录')
             ->setUri($this->linkGenerator->getCurdListPage(Message::class))
-            ->setAttribute('icon', 'fas fa-message');
+            ->setAttribute('icon', 'fas fa-message')
+        ;
     }
 }

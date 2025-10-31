@@ -10,8 +10,8 @@ use OpenAIBundle\Enum\ContextLength;
 use OpenAIBundle\Repository\ApiKeyRepository;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Serializer\Attribute\Ignore;
+use Symfony\Component\Validator\Constraints as Assert;
 use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
-use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
 use Tourze\DoctrineSnowflakeBundle\Traits\SnowflakeKeyAware;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
@@ -26,24 +26,37 @@ class ApiKey implements \Stringable
     #[IndexColumn]
     #[TrackColumn]
     #[Groups(groups: ['admin_curd', 'restful_read', 'restful_read', 'restful_write'])]
+    #[Assert\NotNull]
     #[ORM\Column(type: Types::BOOLEAN, nullable: true, options: ['comment' => '有效', 'default' => 0])]
     private ?bool $valid = false;
 
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 100)]
     #[ORM\Column(length: 100, options: ['comment' => '密钥标题'])]
     private ?string $title = null;
 
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 255)]
     #[ORM\Column(type: Types::STRING, length: 255, options: ['comment' => 'API密钥'])]
     private string $apiKey;
 
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 120)]
     #[ORM\Column(length: 120, options: ['comment' => '调用模型'])]
     private string $model;
 
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 255)]
+    #[Assert\Url]
     #[ORM\Column(type: Types::STRING, length: 255, options: ['comment' => '聊天补全接口URL'])]
     private string $chatCompletionUrl;
 
+    #[Assert\NotNull]
     #[ORM\Column(nullable: true, options: ['comment' => '支持函数调用'])]
     private ?bool $functionCalling = false;
 
+    #[Assert\NotNull]
+    #[Assert\Choice(callback: [ContextLength::class, 'cases'])]
     #[ORM\Column(type: Types::INTEGER, nullable: true, enumType: ContextLength::class, options: ['comment' => '上下文长度'])]
     private ?ContextLength $contextLength = null;
 
@@ -65,20 +78,17 @@ class ApiKey implements \Stringable
             return '';
         }
 
-        return $this->getTitle();
+        return $this->getTitle() ?? '';
     }
-
 
     public function isValid(): ?bool
     {
         return $this->valid;
     }
 
-    public function setValid(?bool $valid): self
+    public function setValid(?bool $valid): void
     {
         $this->valid = $valid;
-
-        return $this;
     }
 
     public function getApiKey(): string
@@ -86,11 +96,9 @@ class ApiKey implements \Stringable
         return $this->apiKey;
     }
 
-    public function setApiKey(string $apiKey): self
+    public function setApiKey(string $apiKey): void
     {
         $this->apiKey = $apiKey;
-
-        return $this;
     }
 
     public function getTitle(): ?string
@@ -98,11 +106,9 @@ class ApiKey implements \Stringable
         return $this->title;
     }
 
-    public function setTitle(string $title): static
+    public function setTitle(string $title): void
     {
         $this->title = $title;
-
-        return $this;
     }
 
     public function getModel(): string
@@ -110,11 +116,9 @@ class ApiKey implements \Stringable
         return $this->model;
     }
 
-    public function setModel(string $model): static
+    public function setModel(string $model): void
     {
         $this->model = $model;
-
-        return $this;
     }
 
     public function getChatCompletionUrl(): string
@@ -122,11 +126,9 @@ class ApiKey implements \Stringable
         return $this->chatCompletionUrl;
     }
 
-    public function setChatCompletionUrl(string $chatCompletionUrl): self
+    public function setChatCompletionUrl(string $chatCompletionUrl): void
     {
         $this->chatCompletionUrl = $chatCompletionUrl;
-
-        return $this;
     }
 
     public function isFunctionCalling(): ?bool
@@ -134,11 +136,9 @@ class ApiKey implements \Stringable
         return $this->functionCalling;
     }
 
-    public function setFunctionCalling(?bool $functionCalling): static
+    public function setFunctionCalling(?bool $functionCalling): void
     {
         $this->functionCalling = $functionCalling;
-
-        return $this;
     }
 
     public function getContextLength(): ?ContextLength
@@ -146,11 +146,9 @@ class ApiKey implements \Stringable
         return $this->contextLength;
     }
 
-    public function setContextLength(?ContextLength $contextLength): self
+    public function setContextLength(?ContextLength $contextLength): void
     {
         $this->contextLength = $contextLength;
-
-        return $this;
     }
 
     /**
@@ -181,4 +179,5 @@ class ApiKey implements \Stringable
         }
 
         return $this;
-    }}
+    }
+}

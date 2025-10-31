@@ -3,10 +3,20 @@
 namespace OpenAIBundle\Tests\Exception;
 
 use OpenAIBundle\Exception\CodeAnalysisException;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Tourze\PHPUnitBase\AbstractExceptionTestCase;
 
-class CodeAnalysisExceptionTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(CodeAnalysisException::class)]
+final class CodeAnalysisExceptionTest extends AbstractExceptionTestCase
 {
+    protected function getExceptionClass(): string
+    {
+        return CodeAnalysisException::class;
+    }
+
     public function testClassNotFoundExceptionMessage(): void
     {
         $filepath = '/path/to/file.php';
@@ -20,7 +30,7 @@ class CodeAnalysisExceptionTest extends TestCase
     public function testExceptionExtendsRuntimeException(): void
     {
         $exception = CodeAnalysisException::classNotFound('test.php');
-        
+
         $this->assertInstanceOf(\RuntimeException::class, $exception);
     }
 }

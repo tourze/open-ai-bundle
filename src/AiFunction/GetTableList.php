@@ -10,6 +10,7 @@ class GetTableList implements ToolInterface
     public const NAME = 'GetTableList';
 
     public function __construct(
+        /** @var EntityService<object> $entityService */
         private readonly EntityService $entityService,
     ) {
     }

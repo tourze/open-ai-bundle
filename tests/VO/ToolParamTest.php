@@ -5,9 +5,14 @@ namespace OpenAIBundle\Tests\VO;
 use OpenAIBundle\Enum\ToolType;
 use OpenAIBundle\VO\FunctionDefinition;
 use OpenAIBundle\VO\ToolParam;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-class ToolParamTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(ToolParam::class)]
+final class ToolParamTest extends TestCase
 {
     public function testCreateToolParam(): void
     {

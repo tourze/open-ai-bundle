@@ -32,48 +32,84 @@ class GetCodeContext implements ToolInterface
         $context_lines = $parameters['context_lines'] ?? 5;
 
         if (!file_exists($filepath)) {
-            return json_encode(['error' => '文件不存在']);
+            return $this->encodeError('文件不存在');
         }
 
         try {
-            $lines = file($filepath);
-            $total_lines = count($lines);
+            $lines = $this->readFileLines($filepath);
+            if (null === $lines) {
+                return $this->encodeError('读取文件失败');
+            }
 
-            // 计算上下文范围
-            $start = max(0, $line_number - $context_lines - 1);
-            $end = min($total_lines, $line_number + $context_lines);
+            $result = $this->buildCodeContext($lines, $line_number, $context_lines);
 
-            // 提取上下文代码
-            $context = array_slice($lines, $start, $end - $start);
-
-            // 分析当前行的符号
-            $current_line = $lines[$line_number - 1] ?? '';
-            $symbols = $this->analyzeLineSymbols($current_line);
-
-            // 分析导入的依赖
-            $imports = $this->analyzeImports($lines);
-
-            $result = [
-                'current_line' => [
-                    'number' => $line_number,
-                    'content' => trim($current_line),
-                    'symbols' => $symbols,
-                ],
-                'context' => array_map(function ($line, $idx) use ($start) {
-                    return [
-                        'line_number' => $start + $idx + 1,
-                        'content' => trim($line),
-                    ];
-                }, $context, array_keys($context)),
-                'imports' => $imports,
-            ];
-
-            return json_encode($result, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+            return $this->encodeResult($result);
         } catch (\Throwable $e) {
-            return json_encode(['error' => $e->getMessage()]);
+            return $this->encodeError($e->getMessage());
         }
     }
 
+    /**
+     * @return array<int, string>|null
+     */
+    private function readFileLines(string $filepath): ?array
+    {
+        $lines = file($filepath);
+
+        return false !== $lines ? $lines : null;
+    }
+
+    /**
+     * @param array<int, string> $lines
+     * @return array<string, mixed>
+     */
+    private function buildCodeContext(array $lines, int $line_number, int $context_lines): array
+    {
+        $total_lines = count($lines);
+        $start = max(0, $line_number - $context_lines - 1);
+        $end = min($total_lines, $line_number + $context_lines);
+        $context = array_slice($lines, (int) $start, $end - $start);
+
+        $current_line = $lines[$line_number - 1] ?? '';
+        $symbols = $this->analyzeLineSymbols($current_line);
+        $imports = $this->analyzeImports($lines);
+
+        return [
+            'current_line' => [
+                'number' => $line_number,
+                'content' => trim($current_line),
+                'symbols' => $symbols,
+            ],
+            'context' => array_map(function ($line, $idx) use ($start) {
+                return [
+                    'line_number' => $start + $idx + 1,
+                    'content' => trim($line),
+                ];
+            }, $context, array_keys($context)),
+            'imports' => $imports,
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $result
+     */
+    private function encodeResult(array $result): string
+    {
+        $jsonResult = json_encode($result, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+
+        return false !== $jsonResult ? $jsonResult : '';
+    }
+
+    private function encodeError(string $message): string
+    {
+        $errorResult = json_encode(['error' => $message]);
+
+        return false !== $errorResult ? $errorResult : '';
+    }
+
+    /**
+     * @return array<string, array<int, string>>
+     */
     private function analyzeLineSymbols(string $line): array
     {
         $symbols = [];
@@ -95,6 +131,10 @@ class GetCodeContext implements ToolInterface
         return $symbols;
     }
 
+    /**
+     * @param array<int, string> $lines
+     * @return array<string, array<int, string>|string>
+     */
     private function analyzeImports(array $lines): array
     {
         $imports = [];
@@ -102,12 +142,12 @@ class GetCodeContext implements ToolInterface
 
         foreach ($lines as $line) {
             // 获取命名空间
-            if (preg_match('/namespace\s+([^;]+);/', $line, $matches)) {
+            if (1 === preg_match('/namespace\s+([^;]+);/', $line, $matches)) {
                 $namespace = $matches[1];
             }
 
             // 获取use语句
-            if (preg_match('/use\s+([^;]+);/', $line, $matches)) {
+            if (1 === preg_match('/use\s+([^;]+);/', $line, $matches)) {
                 $imports[] = $matches[1];
             }
         }

@@ -2,376 +2,453 @@
 
 namespace OpenAIBundle\Tests\Entity;
 
-use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use OpenAIBundle\Entity\Character;
 use OpenAIBundle\Entity\Conversation;
 use OpenAIBundle\Entity\Message;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Tourze\PHPUnitDoctrineEntity\AbstractEntityTestCase;
 
 /**
  * Conversation实体测试
+ *
+ * @internal
  */
-class ConversationTest extends TestCase
+#[CoversClass(Conversation::class)]
+final class ConversationTest extends AbstractEntityTestCase
 {
-    private Conversation $conversation;
+    private ?Conversation $conversation = null;
 
-    protected function setUp(): void
+    protected function onSetUp(): void
     {
-        $this->conversation = new Conversation();
+    }
+
+    private function getConversation(): Conversation
+    {
+        return $this->conversation ??= new Conversation();
+    }
+
+    protected function createEntity(): object
+    {
+        return new Conversation();
+    }
+
+    /** @return iterable<string, array{0: string, 1: mixed}> */
+    public static function propertiesProvider(): iterable
+    {
+        yield 'title' => ['title', 'Test Conversation'];
+        yield 'description' => ['description', 'Test description'];
+        yield 'model' => ['model', 'gpt-4'];
+        yield 'systemPrompt' => ['systemPrompt', 'You are a helpful assistant.'];
+        yield 'valid' => ['valid', true];
+        yield 'createdBy' => ['createdBy', 'user123'];
+        yield 'updatedBy' => ['updatedBy', 'admin456'];
+        yield 'createTime' => ['createTime', new \DateTimeImmutable()];
+        yield 'updateTime' => ['updateTime', new \DateTimeImmutable()];
     }
 
     public function testConstructorInitializesMessagesCollection(): void
     {
-        $this->assertInstanceOf(ArrayCollection::class, $this->conversation->getMessages());
-        $this->assertCount(0, $this->conversation->getMessages());
+        $this->assertInstanceOf(ArrayCollection::class, $this->getConversation()->getMessages());
+        $this->assertCount(0, $this->getConversation()->getMessages());
     }
 
     public function testStringRepresentationReturnsTitle(): void
     {
         $title = '测试对话';
-        $this->conversation->setTitle($title);
-        
-        $this->assertEquals($title, (string) $this->conversation);
+        $this->getConversation()->setTitle($title);
+
+        $this->assertEquals($title, (string) $this->getConversation());
     }
 
     public function testTitleGetterAndSetter(): void
     {
         $title = 'AI聊天对话';
-        $result = $this->conversation->setTitle($title);
-        
-        $this->assertSame($this->conversation, $result);
-        $this->assertEquals($title, $this->conversation->getTitle());
+        $this->getConversation()->setTitle($title);
+
+        $this->assertEquals($title, $this->getConversation()->getTitle());
     }
 
     public function testTitleSetterWithEmptyString(): void
     {
-        $result = $this->conversation->setTitle('');
-        
-        $this->assertSame($this->conversation, $result);
-        $this->assertEquals('', $this->conversation->getTitle());
+        $this->getConversation()->setTitle('');
+
+        $this->assertEquals('', $this->getConversation()->getTitle());
     }
 
     public function testTitleSetterWithSpecialCharacters(): void
     {
         $title = '特殊字符测试 #@$% 🤖';
-        $this->conversation->setTitle($title);
-        
-        $this->assertEquals($title, $this->conversation->getTitle());
+        $this->getConversation()->setTitle($title);
+
+        $this->assertEquals($title, $this->getConversation()->getTitle());
     }
 
     public function testDescriptionGetterAndSetter(): void
     {
         $description = '这是一个测试对话的描述';
-        $result = $this->conversation->setDescription($description);
-        
-        $this->assertSame($this->conversation, $result);
-        $this->assertEquals($description, $this->conversation->getDescription());
+        $this->getConversation()->setDescription($description);
+
+        $this->assertEquals($description, $this->getConversation()->getDescription());
     }
 
     public function testDescriptionSetterWithNull(): void
     {
-        $result = $this->conversation->setDescription(null);
-        
-        $this->assertSame($this->conversation, $result);
-        $this->assertNull($this->conversation->getDescription());
+        $this->getConversation()->setDescription(null);
+
+        $this->assertNull($this->getConversation()->getDescription());
     }
 
     public function testDescriptionSetterWithLongText(): void
     {
         $longText = str_repeat('测试文本', 1000);
-        $this->conversation->setDescription($longText);
-        
-        $this->assertEquals($longText, $this->conversation->getDescription());
+        $this->getConversation()->setDescription($longText);
+
+        $this->assertEquals($longText, $this->getConversation()->getDescription());
     }
 
     public function testModelGetterAndSetter(): void
     {
         $model = 'gpt-4';
-        $result = $this->conversation->setModel($model);
-        
-        $this->assertSame($this->conversation, $result);
-        $this->assertEquals($model, $this->conversation->getModel());
+        $this->getConversation()->setModel($model);
+
+        $this->assertEquals($model, $this->getConversation()->getModel());
     }
 
     public function testModelDefaultValue(): void
     {
-        $this->assertEquals('gpt-3.5-turbo', $this->conversation->getModel());
+        $this->assertEquals('gpt-3.5-turbo', $this->getConversation()->getModel());
     }
 
     public function testModelSetterWithDifferentModels(): void
     {
         $models = ['gpt-4', 'gpt-3.5-turbo', 'claude-2'];
-        
+
         foreach ($models as $model) {
-            $this->conversation->setModel($model);
-            $this->assertEquals($model, $this->conversation->getModel());
+            $this->getConversation()->setModel($model);
+            $this->assertEquals($model, $this->getConversation()->getModel());
         }
     }
 
     public function testSystemPromptGetterAndSetter(): void
     {
         $prompt = '你是一个友好的AI助手';
-        $result = $this->conversation->setSystemPrompt($prompt);
-        
-        $this->assertSame($this->conversation, $result);
-        $this->assertEquals($prompt, $this->conversation->getSystemPrompt());
+        $this->getConversation()->setSystemPrompt($prompt);
+
+        $this->assertEquals($prompt, $this->getConversation()->getSystemPrompt());
     }
 
     public function testSystemPromptSetterWithNull(): void
     {
-        $result = $this->conversation->setSystemPrompt(null);
-        
-        $this->assertSame($this->conversation, $result);
-        $this->assertNull($this->conversation->getSystemPrompt());
+        $this->getConversation()->setSystemPrompt(null);
+
+        $this->assertNull($this->getConversation()->getSystemPrompt());
     }
 
     public function testSystemPromptSetterWithLongPrompt(): void
     {
         $longPrompt = str_repeat('系统提示词测试', 500);
-        $this->conversation->setSystemPrompt($longPrompt);
-        
-        $this->assertEquals($longPrompt, $this->conversation->getSystemPrompt());
+        $this->getConversation()->setSystemPrompt($longPrompt);
+
+        $this->assertEquals($longPrompt, $this->getConversation()->getSystemPrompt());
     }
 
     public function testAddMessage(): void
     {
+        /*
+         * 使用具体类进行 mock 的原因：
+         * 1. Message 是 Doctrine Entity 实体类，需要测试与 Conversation 的关联关系
+         * 2. 这种使用是合理和必要的，因为测试的是实体间的双向关联操作
+         * 3. 暂无更好的替代方案，因为需要验证 setConversation 方法的调用行为
+         */
         $message = $this->createMock(Message::class);
         $message->expects($this->once())
             ->method('setConversation')
-            ->with($this->conversation);
-        
-        $result = $this->conversation->addMessage($message);
-        
-        $this->assertSame($this->conversation, $result);
-        $this->assertTrue($this->conversation->getMessages()->contains($message));
-        $this->assertCount(1, $this->conversation->getMessages());
+            ->with($this->getConversation())
+        ;
+
+        $this->getConversation()->addMessage($message);
+
+        $this->assertTrue($this->getConversation()->getMessages()->contains($message));
+        $this->assertCount(1, $this->getConversation()->getMessages());
     }
 
     public function testAddMessageDoesNotAddDuplicate(): void
     {
+        /*
+         * 使用具体类进行 mock 的原因：
+         * 1. Message 是 Doctrine Entity 实体类，需要测试重复添加消息的逻辑
+         * 2. 这种使用是合理和必要的，因为测试的是集合操作和去重逻辑
+         * 3. 暂无更好的替代方案，因为需要验证 setConversation 方法的调用次数
+         */
         $message = $this->createMock(Message::class);
         $message->expects($this->once())
             ->method('setConversation')
-            ->with($this->conversation);
-        
-        $this->conversation->addMessage($message);
-        $this->conversation->addMessage($message); // 添加相同消息
-        
-        $this->assertCount(1, $this->conversation->getMessages());
+            ->with($this->getConversation())
+        ;
+
+        $this->getConversation()->addMessage($message);
+        $this->getConversation()->addMessage($message); // 添加相同消息
+
+        $this->assertCount(1, $this->getConversation()->getMessages());
     }
 
     public function testRemoveMessage(): void
     {
+        /*
+         * 使用具体类进行 mock 的原因：
+         * 1. Message 是 Doctrine Entity 实体类，需要测试从对话中移除消息的逻辑
+         * 2. 这种使用是合理和必要的，因为测试的是实体间的关联管理
+         * 3. 暂无更好的替代方案，因为需要验证双向关联的清理行为
+         */
         $message = $this->createMock(Message::class);
-        $message->method('getConversation')->willReturn($this->conversation);
+        $message->method('getConversation')->willReturn($this->getConversation());
         $message->expects($this->once())
             ->method('setConversation')
-            ->with(null);
-        
-        $this->conversation->getMessages()->add($message);
-        
-        $result = $this->conversation->removeMessage($message);
-        
-        $this->assertSame($this->conversation, $result);
-        $this->assertFalse($this->conversation->getMessages()->contains($message));
+            ->with(null)
+        ;
+
+        $this->getConversation()->getMessages()->add($message);
+
+        $this->getConversation()->removeMessage($message);
+
+        $this->assertFalse($this->getConversation()->getMessages()->contains($message));
     }
 
     public function testRemoveMessageWhenNotInCollection(): void
     {
+        /*
+         * 使用具体类进行 mock 的原因：
+         * 1. Message 是 Doctrine Entity 实体类，测试边界情况下的移除逻辑
+         * 2. 这种使用是合理和必要的，因为需要验证不存在的消息不会被错误处理
+         * 3. 暂无更好的替代方案，因为需要验证 setConversation 方法不被调用
+         */
         $message = $this->createMock(Message::class);
         $message->expects($this->never())
-            ->method('setConversation');
-        
-        $result = $this->conversation->removeMessage($message);
-        
-        $this->assertSame($this->conversation, $result);
+            ->method('setConversation')
+        ;
+
+        $this->getConversation()->removeMessage($message);
     }
 
     public function testRemoveMessageWhenConversationNotSame(): void
     {
+        /*
+         * 使用具体类进行 mock 的原因：
+         * 1. Message 是 Doctrine Entity 实体类，测试不同对话的消息移除逻辑
+         * 2. 这种使用是合理和必要的，因为需要验证关联关系的一致性检查
+         * 3. 暂无更好的替代方案，因为需要 mock 不同的对话实例进行比较
+         */
         $message = $this->createMock(Message::class);
         $otherConversation = new Conversation();
         $message->method('getConversation')->willReturn($otherConversation);
         $message->expects($this->never())
-            ->method('setConversation');
-        
-        $this->conversation->getMessages()->add($message);
-        $this->conversation->removeMessage($message);
-        
-        $this->assertFalse($this->conversation->getMessages()->contains($message));
+            ->method('setConversation')
+        ;
+
+        $this->getConversation()->getMessages()->add($message);
+        $this->getConversation()->removeMessage($message);
+
+        $this->assertFalse($this->getConversation()->getMessages()->contains($message));
     }
 
     public function testClearMessages(): void
     {
+        /*
+         * 使用具体类进行 mock 的原因：
+         * 1. Message 是 Doctrine Entity 实体类，需要测试清除所有消息的逻辑
+         * 2. 这种使用是合理和必要的，因为测试的是批量清理关联关系
+         * 3. 暂无更好的替代方案，因为需要验证多个消息的 setConversation 调用
+         */
         $message1 = $this->createMock(Message::class);
+        /*
+         * 使用具体类进行 mock 的原因：
+         * 1. Message 是 Doctrine Entity 实体类，作为第二个消息测试清除功能
+         * 2. 这种使用是合理和必要的，因为测试的是批量操作的完整性
+         * 3. 暂无更好的替代方案，因为需要创建多个独立的消息实例
+         */
         $message2 = $this->createMock(Message::class);
-        
-        $message1->method('getConversation')->willReturn($this->conversation);
-        $message2->method('getConversation')->willReturn($this->conversation);
-        
+
+        $message1->method('getConversation')->willReturn($this->getConversation());
+        $message2->method('getConversation')->willReturn($this->getConversation());
+
         $message1->expects($this->once())->method('setConversation')->with(null);
         $message2->expects($this->once())->method('setConversation')->with(null);
-        
-        $this->conversation->getMessages()->add($message1);
-        $this->conversation->getMessages()->add($message2);
-        
-        $result = $this->conversation->clearMessages();
-        
-        $this->assertSame($this->conversation, $result);
-        $this->assertCount(0, $this->conversation->getMessages());
+
+        $this->getConversation()->getMessages()->add($message1);
+        $this->getConversation()->getMessages()->add($message2);
+
+        $this->getConversation()->clearMessages();
+
+        $this->assertCount(0, $this->getConversation()->getMessages());
     }
 
     public function testActorGetterAndSetter(): void
     {
+        /*
+         * 使用具体类进行 mock 的原因：
+         * 1. Character 是 Doctrine Entity 实体类，作为 Conversation 的角色实体
+         * 2. 这种使用是合理和必要的，因为测试的是实体间的关联关系
+         * 3. 暂无更好的替代方案，因为需要验证对象引用的一致性
+         */
         $character = $this->createMock(Character::class);
-        $result = $this->conversation->setActor($character);
-        
-        $this->assertSame($this->conversation, $result);
-        $this->assertSame($character, $this->conversation->getActor());
+        $this->getConversation()->setActor($character);
+
+        $this->assertSame($character, $this->getConversation()->getActor());
     }
 
     public function testActorSetterWithNull(): void
     {
-        $result = $this->conversation->setActor(null);
-        
-        $this->assertSame($this->conversation, $result);
-        $this->assertNull($this->conversation->getActor());
+        $this->getConversation()->setActor(null);
+
+        $this->assertNull($this->getConversation()->getActor());
     }
 
     public function testValidGetterAndSetter(): void
     {
-        $result = $this->conversation->setValid(true);
-        
-        $this->assertSame($this->conversation, $result);
-        $this->assertTrue($this->conversation->isValid());
+        $this->getConversation()->setValid(true);
+
+        $this->assertTrue($this->getConversation()->isValid());
     }
 
     public function testValidDefaultValue(): void
     {
-        $this->assertFalse($this->conversation->isValid());
+        $this->assertFalse($this->getConversation()->isValid());
     }
 
     public function testValidSetterWithNull(): void
     {
-        $result = $this->conversation->setValid(null);
-        
-        $this->assertSame($this->conversation, $result);
-        $this->assertNull($this->conversation->isValid());
+        $this->getConversation()->setValid(null);
+
+        $this->assertNull($this->getConversation()->isValid());
     }
 
     public function testCreatedByGetterAndSetter(): void
     {
         $createdBy = 'user123';
-        $result = $this->conversation->setCreatedBy($createdBy);
-        
-        $this->assertSame($this->conversation, $result);
-        $this->assertEquals($createdBy, $this->conversation->getCreatedBy());
+        $this->getConversation()->setCreatedBy($createdBy);
+
+        $this->assertEquals($createdBy, $this->getConversation()->getCreatedBy());
     }
 
     public function testCreatedBySetterWithNull(): void
     {
-        $result = $this->conversation->setCreatedBy(null);
-        
-        $this->assertSame($this->conversation, $result);
-        $this->assertNull($this->conversation->getCreatedBy());
+        $this->getConversation()->setCreatedBy(null);
+
+        $this->assertNull($this->getConversation()->getCreatedBy());
     }
 
     public function testUpdatedByGetterAndSetter(): void
     {
         $updatedBy = 'admin456';
-        $result = $this->conversation->setUpdatedBy($updatedBy);
-        
-        $this->assertSame($this->conversation, $result);
-        $this->assertEquals($updatedBy, $this->conversation->getUpdatedBy());
+        $this->getConversation()->setUpdatedBy($updatedBy);
+
+        $this->assertEquals($updatedBy, $this->getConversation()->getUpdatedBy());
     }
 
     public function testUpdatedBySetterWithNull(): void
     {
-        $result = $this->conversation->setUpdatedBy(null);
-        
-        $this->assertSame($this->conversation, $result);
-        $this->assertNull($this->conversation->getUpdatedBy());
+        $this->getConversation()->setUpdatedBy(null);
+
+        $this->assertNull($this->getConversation()->getUpdatedBy());
     }
 
     public function testCreateTimeGetterAndSetter(): void
     {
-        $dateTime = new DateTimeImmutable('2023-01-01 12:00:00');
-        $this->conversation->setCreateTime($dateTime);
-        
-        $this->assertSame($dateTime, $this->conversation->getCreateTime());
+        $dateTime = new \DateTimeImmutable('2023-01-01 12:00:00');
+        $this->getConversation()->setCreateTime($dateTime);
+
+        $this->assertSame($dateTime, $this->getConversation()->getCreateTime());
     }
 
     public function testCreateTimeSetterWithNull(): void
     {
-        $this->conversation->setCreateTime(null);
-        
-        $this->assertNull($this->conversation->getCreateTime());
+        $this->getConversation()->setCreateTime(null);
+
+        $this->assertNull($this->getConversation()->getCreateTime());
     }
 
     public function testUpdateTimeGetterAndSetter(): void
     {
-        $dateTime = new DateTimeImmutable('2023-01-02 15:30:00');
-        $this->conversation->setUpdateTime($dateTime);
-        
-        $this->assertSame($dateTime, $this->conversation->getUpdateTime());
+        $dateTime = new \DateTimeImmutable('2023-01-02 15:30:00');
+        $this->getConversation()->setUpdateTime($dateTime);
+
+        $this->assertSame($dateTime, $this->getConversation()->getUpdateTime());
     }
 
     public function testUpdateTimeSetterWithNull(): void
     {
-        $this->conversation->setUpdateTime(null);
-        
-        $this->assertNull($this->conversation->getUpdateTime());
+        $this->getConversation()->setUpdateTime(null);
+
+        $this->assertNull($this->getConversation()->getUpdateTime());
     }
 
     public function testGetIdReturnsNull(): void
     {
-        $this->assertNull($this->conversation->getId());
+        $this->assertNull($this->getConversation()->getId());
     }
 
     public function testCompleteConversationWorkflow(): void
     {
         // 设置基本属性
-        $this->conversation->setTitle('完整对话测试');
-        $this->conversation->setDescription('测试完整对话流程');
-        $this->conversation->setModel('gpt-4');
-        $this->conversation->setSystemPrompt('你是一个测试助手');
-        $this->conversation->setValid(true);
-        
+        $this->getConversation()->setTitle('完整对话测试');
+        $this->getConversation()->setDescription('测试完整对话流程');
+        $this->getConversation()->setModel('gpt-4');
+        $this->getConversation()->setSystemPrompt('你是一个测试助手');
+        $this->getConversation()->setValid(true);
+
         // 设置角色
+        /*
+         * 使用具体类进行 mock 的原因：
+         * 1. Character 是 Doctrine Entity 实体类，作为完整测试流程的一部分
+         * 2. 这种使用是合理和必要的，因为测试的是完整的业务流程
+         * 3. 暂无更好的替代方案，因为需要与其他组件配合测试
+         */
         $character = $this->createMock(Character::class);
-        $this->conversation->setActor($character);
-        
+        $this->getConversation()->setActor($character);
+
         // 添加消息
+        /*
+         * 使用具体类进行 mock 的原因：
+         * 1. Message 是 Doctrine Entity 实体类，作为完整测试流程的一部分
+         * 2. 这种使用是合理和必要的，因为测试的是完整的业务流程
+         * 3. 暂无更好的替代方案，因为需要验证消息与对话的关联关系
+         */
         $message1 = $this->createMock(Message::class);
-        $message1->method('getConversation')->willReturn($this->conversation);
-        $message1->expects($this->once())->method('setConversation')->with($this->conversation);
-        
+        $message1->method('getConversation')->willReturn($this->getConversation());
+        $message1->expects($this->once())->method('setConversation')->with($this->getConversation());
+
+        /*
+         * 使用具体类进行 mock 的原因：
+         * 1. Message 是 Doctrine Entity 实体类，作为第二个消息测试完整流程
+         * 2. 这种使用是合理和必要的，因为测试的是多个消息的关联管理
+         * 3. 暂无更好的替代方案，因为需要创建多个独立的消息实例
+         */
         $message2 = $this->createMock(Message::class);
-        $message2->method('getConversation')->willReturn($this->conversation);
-        $message2->expects($this->once())->method('setConversation')->with($this->conversation);
-        
-        $this->conversation->addMessage($message1);
-        $this->conversation->addMessage($message2);
-        
+        $message2->method('getConversation')->willReturn($this->getConversation());
+        $message2->expects($this->once())->method('setConversation')->with($this->getConversation());
+
+        $this->getConversation()->addMessage($message1);
+        $this->getConversation()->addMessage($message2);
+
         // 验证状态
-        $this->assertEquals('完整对话测试', $this->conversation->getTitle());
-        $this->assertEquals('测试完整对话流程', $this->conversation->getDescription());
-        $this->assertEquals('gpt-4', $this->conversation->getModel());
-        $this->assertEquals('你是一个测试助手', $this->conversation->getSystemPrompt());
-        $this->assertTrue($this->conversation->isValid());
-        $this->assertSame($character, $this->conversation->getActor());
-        $this->assertCount(2, $this->conversation->getMessages());
-        $this->assertEquals('完整对话测试', (string) $this->conversation);
+        $this->assertEquals('完整对话测试', $this->getConversation()->getTitle());
+        $this->assertEquals('测试完整对话流程', $this->getConversation()->getDescription());
+        $this->assertEquals('gpt-4', $this->getConversation()->getModel());
+        $this->assertEquals('你是一个测试助手', $this->getConversation()->getSystemPrompt());
+        $this->assertTrue($this->getConversation()->isValid());
+        $this->assertSame($character, $this->getConversation()->getActor());
+        $this->assertCount(2, $this->getConversation()->getMessages());
+        $this->assertEquals('完整对话测试', (string) $this->getConversation());
     }
 
     public function testTitleWithUnicodeCharacters(): void
     {
         $unicodeTitle = '测试 🤖 AI 对话 💬 🚀';
-        $this->conversation->setTitle($unicodeTitle);
-        
-        $this->assertEquals($unicodeTitle, $this->conversation->getTitle());
-        $this->assertEquals($unicodeTitle, (string) $this->conversation);
+        $this->getConversation()->setTitle($unicodeTitle);
+
+        $this->assertEquals($unicodeTitle, $this->getConversation()->getTitle());
+        $this->assertEquals($unicodeTitle, (string) $this->getConversation());
     }
 
     public function testModelValidation(): void
@@ -381,26 +458,32 @@ class ConversationTest extends TestCase
             'gpt-4',
             'gpt-4-turbo',
             'claude-2',
-            'claude-3'
+            'claude-3',
         ];
-        
+
         foreach ($validModels as $model) {
-            $this->conversation->setModel($model);
-            $this->assertEquals($model, $this->conversation->getModel());
+            $this->getConversation()->setModel($model);
+            $this->assertEquals($model, $this->getConversation()->getModel());
         }
     }
 
     public function testTimestampHandling(): void
     {
-        $createTime = new DateTimeImmutable('2023-01-01 10:00:00');
-        $updateTime = new DateTimeImmutable('2023-01-01 11:00:00');
-        
-        $this->conversation->setCreateTime($createTime);
-        $this->conversation->setUpdateTime($updateTime);
-        
-        $this->assertEquals($createTime->format('Y-m-d H:i:s'), $this->conversation->getCreateTime()->format('Y-m-d H:i:s'));
-        $this->assertEquals($updateTime->format('Y-m-d H:i:s'), $this->conversation->getUpdateTime()->format('Y-m-d H:i:s'));
-        
-        $this->assertTrue($this->conversation->getUpdateTime() > $this->conversation->getCreateTime());
+        $createTime = new \DateTimeImmutable('2023-01-01 10:00:00');
+        $updateTime = new \DateTimeImmutable('2023-01-01 11:00:00');
+
+        $this->getConversation()->setCreateTime($createTime);
+        $this->getConversation()->setUpdateTime($updateTime);
+
+        $actualCreateTime = $this->getConversation()->getCreateTime();
+        $actualUpdateTime = $this->getConversation()->getUpdateTime();
+
+        $this->assertNotNull($actualCreateTime);
+        $this->assertNotNull($actualUpdateTime);
+
+        $this->assertEquals($createTime->format('Y-m-d H:i:s'), $actualCreateTime->format('Y-m-d H:i:s'));
+        $this->assertEquals($updateTime->format('Y-m-d H:i:s'), $actualUpdateTime->format('Y-m-d H:i:s'));
+
+        $this->assertGreaterThan($this->getConversation()->getCreateTime(), $this->getConversation()->getUpdateTime());
     }
-} 
+}

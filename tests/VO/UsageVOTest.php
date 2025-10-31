@@ -3,11 +3,16 @@
 namespace OpenAIBundle\Tests\VO;
 
 use OpenAIBundle\VO\UsageVO;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-class UsageVOTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(UsageVO::class)]
+final class UsageVOTest extends TestCase
 {
-    public function testConstructor_setsAllProperties(): void
+    public function testConstructorSetsAllProperties(): void
     {
         $promptTokens = 100;
         $completionTokens = 50;
@@ -20,12 +25,12 @@ class UsageVOTest extends TestCase
         $this->assertEquals($totalTokens, $usage->getTotalTokens());
     }
 
-    public function testFromArray_createsUsageVOFromValidData(): void
+    public function testFromArrayCreatesUsageVOFromValidData(): void
     {
         $data = [
             'prompt_tokens' => 200,
             'completion_tokens' => 75,
-            'total_tokens' => 275
+            'total_tokens' => 275,
         ];
 
         $usage = UsageVO::fromArray($data);
@@ -35,21 +40,21 @@ class UsageVOTest extends TestCase
         $this->assertEquals(275, $usage->getTotalTokens());
     }
 
-    public function testGetPromptTokens_returnsCorrectValue(): void
+    public function testGetPromptTokensReturnsCorrectValue(): void
     {
         $usage = new UsageVO(150, 50, 200);
 
         $this->assertEquals(150, $usage->getPromptTokens());
     }
 
-    public function testGetCompletionTokens_returnsCorrectValue(): void
+    public function testGetCompletionTokensReturnsCorrectValue(): void
     {
         $usage = new UsageVO(100, 75, 175);
 
         $this->assertEquals(75, $usage->getCompletionTokens());
     }
 
-    public function testGetTotalTokens_returnsCorrectValue(): void
+    public function testGetTotalTokensReturnsCorrectValue(): void
     {
         $usage = new UsageVO(120, 80, 200);
 
@@ -74,12 +79,12 @@ class UsageVOTest extends TestCase
         $this->assertEquals(15000, $usage->getTotalTokens());
     }
 
-    public function testFromArray_handlesStringNumbers(): void
+    public function testFromArrayHandlesStringNumbers(): void
     {
         $data = [
             'prompt_tokens' => '250',
             'completion_tokens' => '125',
-            'total_tokens' => '375'
+            'total_tokens' => '375',
         ];
 
         $usage = UsageVO::fromArray($data);
@@ -167,11 +172,12 @@ class UsageVOTest extends TestCase
 
     public function testFromArrayWithMissingFields(): void
     {
-        $this->expectException(\TypeError::class);
-        
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Missing required fields in usage data');
+
         // 缺少必需字段应该抛出异常
         $data = [
-            'prompt_tokens' => 100
+            'prompt_tokens' => 100,
             // 缺少 completion_tokens 和 total_tokens
         ];
 
@@ -185,7 +191,7 @@ class UsageVOTest extends TestCase
             'completion_tokens' => 75,
             'total_tokens' => 225,
             'extra_field' => 'ignored',
-            'another_extra' => 123
+            'another_extra' => 123,
         ];
 
         $usage = UsageVO::fromArray($data);
@@ -209,4 +215,4 @@ class UsageVOTest extends TestCase
         $this->assertEquals(0, $minUsage->getCompletionTokens());
         $this->assertEquals(0, $minUsage->getTotalTokens());
     }
-} 
+}

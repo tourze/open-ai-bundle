@@ -10,6 +10,7 @@ use Tourze\MCPContracts\ToolInterface;
 class GetTableFields implements ToolInterface
 {
     public function __construct(
+        /** @var EntityService<object> $entityService */
         private readonly EntityService $entityService,
     ) {
     }
@@ -31,6 +32,13 @@ class GetTableFields implements ToolInterface
 
     public function execute(array $parameters = []): string
     {
-        return $this->entityService->getTableFields($parameters['table_name']);
+        $tableName = $parameters['table_name'] ?? '';
+        if (!is_string($tableName) || '' === $tableName) {
+            $result = json_encode(['error' => '表名不能为空']);
+
+            return false !== $result ? $result : '';
+        }
+
+        return $this->entityService->getTableFields($tableName);
     }
 }

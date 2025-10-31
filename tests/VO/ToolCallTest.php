@@ -3,11 +3,16 @@
 namespace OpenAIBundle\Tests\VO;
 
 use OpenAIBundle\VO\ToolCall;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-class ToolCallTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(ToolCall::class)]
+final class ToolCallTest extends TestCase
 {
-    public function testConstructor_setsAllProperties(): void
+    public function testConstructorSetsAllProperties(): void
     {
         $id = 'call_123456';
         $index = '0';
@@ -22,7 +27,7 @@ class ToolCallTest extends TestCase
         $this->assertEquals($functionArguments, $toolCall->getFunctionArguments());
     }
 
-    public function testGetId_returnsCorrectId(): void
+    public function testGetIdReturnsCorrectId(): void
     {
         $toolCall = new ToolCall(
             'call_test_789',
@@ -35,7 +40,7 @@ class ToolCallTest extends TestCase
         $this->assertEquals('call_test_789', $toolCall->getId());
     }
 
-    public function testGetFunctionName_returnsCorrectName(): void
+    public function testGetFunctionNameReturnsCorrectName(): void
     {
         $toolCall = new ToolCall(
             'call_func',
@@ -48,12 +53,12 @@ class ToolCallTest extends TestCase
         $this->assertEquals('send_email', $toolCall->getFunctionName());
     }
 
-    public function testGetFunctionArguments_returnsCorrectArguments(): void
+    public function testGetFunctionArgumentsReturnsCorrectArguments(): void
     {
         $arguments = [
             'query' => 'SELECT * FROM users',
             'limit' => 10,
-            'offset' => 0
+            'offset' => 0,
         ];
 
         $toolCall = new ToolCall(
@@ -87,12 +92,12 @@ class ToolCallTest extends TestCase
             'config' => [
                 'timeout' => 30,
                 'retries' => 3,
-                'headers' => ['Content-Type' => 'application/json']
+                'headers' => ['Content-Type' => 'application/json'],
             ],
             'data' => [
                 'items' => [1, 2, 3],
-                'metadata' => ['version' => '1.0']
-            ]
+                'metadata' => ['version' => '1.0'],
+            ],
         ];
 
         $toolCall = new ToolCall(
@@ -113,7 +118,7 @@ class ToolCallTest extends TestCase
         $stringArgs = [
             'text' => 'Hello, world!',
             'language' => 'en',
-            'format' => 'plain'
+            'format' => 'plain',
         ];
 
         $toolCall = new ToolCall(
@@ -133,7 +138,7 @@ class ToolCallTest extends TestCase
         $numericArgs = [
             'x' => 10.5,
             'y' => 20,
-            'precision' => 2
+            'precision' => 2,
         ];
 
         $toolCall = new ToolCall(
@@ -154,7 +159,7 @@ class ToolCallTest extends TestCase
         $booleanArgs = [
             'enabled' => true,
             'strict_mode' => false,
-            'debug' => true
+            'debug' => true,
         ];
 
         $toolCall = new ToolCall(
@@ -235,7 +240,7 @@ class ToolCallTest extends TestCase
         $toolCalls = [
             new ToolCall('call_1', '0', 'function', 'func1', []),
             new ToolCall('call_2', '1', 'function', 'func2', []),
-            new ToolCall('call_3', '10', 'function', 'func3', [])
+            new ToolCall('call_3', '10', 'function', 'func3', []),
         ];
 
         $this->assertCount(3, $toolCalls);
@@ -262,7 +267,7 @@ class ToolCallTest extends TestCase
         $unicodeArgs = [
             'message' => '你好世界',
             'emoji' => '🚀💻✅',
-            'mixed' => 'Hello 世界 🌍'
+            'mixed' => 'Hello 世界 🌍',
         ];
 
         $toolCall = new ToolCall(
@@ -289,7 +294,7 @@ class ToolCallTest extends TestCase
             [
                 'location' => 'Shanghai, China',
                 'unit' => 'metric',
-                'include_forecast' => false
+                'include_forecast' => false,
             ]
         );
 
@@ -299,4 +304,4 @@ class ToolCallTest extends TestCase
         $this->assertEquals('metric', $weatherToolCall->getFunctionArguments()['unit']);
         $this->assertFalse($weatherToolCall->getFunctionArguments()['include_forecast']);
     }
-} 
+}

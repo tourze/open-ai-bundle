@@ -4,12 +4,18 @@ namespace OpenAIBundle\Tests\VO;
 
 use OpenAIBundle\VO\ChoiceVO;
 use OpenAIBundle\VO\StreamChunkVO;
+use OpenAIBundle\VO\StreamResponseVO;
 use OpenAIBundle\VO\UsageVO;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-class StreamChunkVOTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(StreamChunkVO::class)]
+final class StreamChunkVOTest extends TestCase
 {
-    public function testFromArray_createsStreamChunkVOFromValidData(): void
+    public function testFromArrayCreatesStreamChunkVOFromValidData(): void
     {
         $data = [
             'id' => 'chatcmpl-123',
@@ -21,14 +27,14 @@ class StreamChunkVOTest extends TestCase
                 [
                     'delta' => ['content' => 'Hello world'],
                     'finish_reason' => null,
-                    'index' => 0
-                ]
+                    'index' => 0,
+                ],
             ],
             'usage' => [
                 'prompt_tokens' => 12,
                 'completion_tokens' => 10,
-                'total_tokens' => 22
-            ]
+                'total_tokens' => 22,
+            ],
         ];
 
         $streamChunk = StreamChunkVO::fromArray($data);
@@ -43,14 +49,14 @@ class StreamChunkVOTest extends TestCase
         $this->assertEquals($data, $streamChunk->getRawData());
     }
 
-    public function testFromArray_handlesMinimalData(): void
+    public function testFromArrayHandlesMinimalData(): void
     {
         $data = [
             'id' => 'chatcmpl-minimal',
             'created' => 1677649420,
             'model' => 'gpt-3.5-turbo',
             'object' => 'chat.completion.chunk',
-            'choices' => []
+            'choices' => [],
         ];
 
         $streamChunk = StreamChunkVO::fromArray($data);
@@ -62,7 +68,7 @@ class StreamChunkVOTest extends TestCase
         $this->assertEquals($data, $streamChunk->getRawData());
     }
 
-    public function testFromArray_handlesMultipleChoices(): void
+    public function testFromArrayHandlesMultipleChoices(): void
     {
         $data = [
             'id' => 'chatcmpl-multi',
@@ -73,14 +79,14 @@ class StreamChunkVOTest extends TestCase
                 [
                     'delta' => ['content' => 'Choice 1'],
                     'finish_reason' => null,
-                    'index' => 0
+                    'index' => 0,
                 ],
                 [
                     'delta' => ['content' => 'Choice 2'],
                     'finish_reason' => null,
-                    'index' => 1
-                ]
-            ]
+                    'index' => 1,
+                ],
+            ],
         ];
 
         $streamChunk = StreamChunkVO::fromArray($data);
@@ -91,7 +97,7 @@ class StreamChunkVOTest extends TestCase
         $this->assertInstanceOf(ChoiceVO::class, $choices[1]);
     }
 
-    public function testGetChoices_returnsChoiceVOArray(): void
+    public function testGetChoicesReturnsChoiceVOArray(): void
     {
         $data = [
             'id' => 'test',
@@ -102,9 +108,9 @@ class StreamChunkVOTest extends TestCase
                 [
                     'delta' => ['content' => 'Test content'],
                     'finish_reason' => 'stop',
-                    'index' => 0
-                ]
-            ]
+                    'index' => 0,
+                ],
+            ],
         ];
 
         $streamChunk = StreamChunkVO::fromArray($data);
@@ -114,7 +120,7 @@ class StreamChunkVOTest extends TestCase
         $this->assertEquals('Test content', $choices[0]->getContent());
     }
 
-    public function testGetUsage_returnsUsageVOWhenPresent(): void
+    public function testGetUsageReturnsUsageVOWhenPresent(): void
     {
         $data = [
             'id' => 'test',
@@ -125,8 +131,8 @@ class StreamChunkVOTest extends TestCase
             'usage' => [
                 'prompt_tokens' => 100,
                 'completion_tokens' => 50,
-                'total_tokens' => 150
-            ]
+                'total_tokens' => 150,
+            ],
         ];
 
         $streamChunk = StreamChunkVO::fromArray($data);
@@ -138,22 +144,7 @@ class StreamChunkVOTest extends TestCase
         $this->assertEquals(150, $usage->getTotalTokens());
     }
 
-    public function testGetUsage_returnsNullWhenNotPresent(): void
-    {
-        $data = [
-            'id' => 'test',
-            'created' => 1677649420,
-            'model' => 'gpt-3.5-turbo',
-            'object' => 'chat.completion.chunk',
-            'choices' => []
-        ];
-
-        $streamChunk = StreamChunkVO::fromArray($data);
-
-        $this->assertNull($streamChunk->getUsage());
-    }
-
-    public function testGetRawData_returnsOriginalData(): void
+    public function testGetUsageReturnsNullWhenNotPresent(): void
     {
         $data = [
             'id' => 'test',
@@ -161,7 +152,22 @@ class StreamChunkVOTest extends TestCase
             'model' => 'gpt-3.5-turbo',
             'object' => 'chat.completion.chunk',
             'choices' => [],
-            'extra_field' => 'extra_value'
+        ];
+
+        $streamChunk = StreamChunkVO::fromArray($data);
+
+        $this->assertNull($streamChunk->getUsage());
+    }
+
+    public function testGetRawDataReturnsOriginalData(): void
+    {
+        $data = [
+            'id' => 'test',
+            'created' => 1677649420,
+            'model' => 'gpt-3.5-turbo',
+            'object' => 'chat.completion.chunk',
+            'choices' => [],
+            'extra_field' => 'extra_value',
         ];
 
         $streamChunk = StreamChunkVO::fromArray($data);
@@ -170,14 +176,14 @@ class StreamChunkVOTest extends TestCase
         $this->assertEquals('extra_value', $streamChunk->getRawData()['extra_field']);
     }
 
-    public function testSetRawData_updatesRawData(): void
+    public function testSetRawDataUpdatesRawData(): void
     {
         $originalData = [
             'id' => 'test',
             'created' => 1677649420,
             'model' => 'gpt-3.5-turbo',
             'object' => 'chat.completion.chunk',
-            'choices' => []
+            'choices' => [],
         ];
 
         $streamChunk = StreamChunkVO::fromArray($originalData);
@@ -196,15 +202,15 @@ class StreamChunkVOTest extends TestCase
             'created' => 1677649420,
             'model' => 'gpt-3.5-turbo',
             'object' => 'chat.completion.chunk',
-            'choices' => []
+            'choices' => [],
         ];
 
         $streamChunk = StreamChunkVO::fromArray($data);
 
-        $this->assertInstanceOf(\OpenAIBundle\VO\StreamResponseVO::class, $streamChunk);
+        $this->assertInstanceOf(StreamResponseVO::class, $streamChunk);
     }
 
-    public function testFromArray_handlesComplexChoiceData(): void
+    public function testFromArrayHandlesComplexChoiceData(): void
     {
         $data = [
             'id' => 'chatcmpl-complex',
@@ -221,15 +227,15 @@ class StreamChunkVOTest extends TestCase
                                 'id' => 'call_123',
                                 'function' => [
                                     'name' => 'get_weather',
-                                    'arguments' => '{"location": "Beijing"}'
-                                ]
-                            ]
-                        ]
+                                    'arguments' => '{"location": "Beijing"}',
+                                ],
+                            ],
+                        ],
                     ],
                     'finish_reason' => 'tool_calls',
-                    'index' => 0
-                ]
-            ]
+                    'index' => 0,
+                ],
+            ],
         ];
 
         $streamChunk = StreamChunkVO::fromArray($data);
@@ -241,14 +247,14 @@ class StreamChunkVOTest extends TestCase
         $this->assertNotNull($choices[0]->getToolCalls());
     }
 
-    public function testFromArray_withEmptySystemFingerprint(): void
+    public function testFromArrayWithEmptySystemFingerprint(): void
     {
         $data = [
             'id' => 'test',
             'created' => 1677649420,
             'model' => 'gpt-3.5-turbo',
             'object' => 'chat.completion.chunk',
-            'choices' => []
+            'choices' => [],
         ];
 
         $streamChunk = StreamChunkVO::fromArray($data);
@@ -258,14 +264,14 @@ class StreamChunkVOTest extends TestCase
         $this->assertEquals('gpt-3.5-turbo', $streamChunk->model);
     }
 
-    public function testMsgId_derivedFromId(): void
+    public function testMsgIdDerivedFromId(): void
     {
         $data = [
             'id' => 'test-msg-id',
             'created' => 1677649420,
             'model' => 'gpt-3.5-turbo',
             'object' => 'chat.completion.chunk',
-            'choices' => []
+            'choices' => [],
         ];
 
         $streamChunk = StreamChunkVO::fromArray($data);
@@ -285,12 +291,12 @@ class StreamChunkVOTest extends TestCase
                 [
                     'delta' => [
                         'content' => 'Final answer',
-                        'reasoning_content' => 'Let me think about this...'
+                        'reasoning_content' => 'Let me think about this...',
                     ],
                     'finish_reason' => null,
-                    'index' => 0
-                ]
-            ]
+                    'index' => 0,
+                ],
+            ],
         ];
 
         $streamChunk = StreamChunkVO::fromArray($data);
@@ -308,7 +314,7 @@ class StreamChunkVOTest extends TestCase
             'model' => 'gpt-4',
             'object' => 'chat.completion.chunk',
             'choices' => [],
-            'metadata' => ['key' => 'value']
+            'metadata' => ['key' => 'value'],
         ];
 
         $streamChunk = StreamChunkVO::fromArray($originalData);
@@ -318,4 +324,4 @@ class StreamChunkVOTest extends TestCase
         $this->assertEquals('gpt-4', $streamChunk->model);
         $this->assertEquals($originalData, $streamChunk->getRawData());
     }
-} 
+}

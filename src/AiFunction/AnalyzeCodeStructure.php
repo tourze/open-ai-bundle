@@ -25,71 +25,160 @@ class AnalyzeCodeStructure implements ToolInterface
         yield new FunctionParam('detail_level', FunctionParamType::string, '分析详细程度(basic/full)', false);
     }
 
+    /**
+     * @param array<string, mixed> $parameters
+     */
     public function execute(array $parameters = []): string
     {
         $filepath = $parameters['filepath'] ?? '';
         $detail_level = $parameters['detail_level'] ?? 'basic';
 
         if (!file_exists($filepath)) {
-            return json_encode(['error' => '文件不存在']);
+            $result = json_encode(['error' => '文件不存在']);
+
+            return false !== $result ? $result : '{"error": "JSON encoding failed"}';
         }
 
         try {
-            $reflection = new \ReflectionClass($this->getClassNameFromFile($filepath));
-
-            $result = [
-                'class_name' => $reflection->getName(),
-                'namespace' => $reflection->getNamespaceName(),
-                'methods' => [],
-                'properties' => [],
-            ];
+            $className = $this->getClassNameFromFile($filepath);
+            /** @var class-string $className */
+            $reflection = new \ReflectionClass($className);
+            $result = $this->buildBasicResult($reflection);
 
             if ('full' === $detail_level) {
-                // 分析方法
-                foreach ($reflection->getMethods() as $method) {
-                    $result['methods'][] = [
-                        'name' => $method->getName(),
-                        'visibility' => $this->getVisibility($method),
-                        'parameters' => array_map(function ($param) {
-                            $type = $param->getType();
-                            return [
-                                'name' => $param->getName(),
-                                'type' => $type instanceof \ReflectionType ? (string) $type : 'mixed',
-                            ];
-                        }, $method->getParameters()),
-                        'return_type' => $method->getReturnType() instanceof \ReflectionType ? (string) $method->getReturnType() : 'mixed',
-                        'doc_comment' => $method->getDocComment(),
-                    ];
-                }
-
-                // 分析属性
-                foreach ($reflection->getProperties() as $property) {
-                    $type = $property->getType();
-                    $result['properties'][] = [
-                        'name' => $property->getName(),
-                        'visibility' => $this->getVisibility($property),
-                        'type' => $type instanceof \ReflectionType ? (string) $type : 'mixed',
-                        'doc_comment' => $property->getDocComment(),
-                    ];
-                }
+                $result['methods'] = $this->analyzeMethods($reflection);
+                $result['properties'] = $this->analyzeProperties($reflection);
             }
 
-            return json_encode($result, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+            $encoded = json_encode($result, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+
+            return false !== $encoded ? $encoded : '{"error": "JSON encoding failed"}';
         } catch (\Throwable $e) {
-            return json_encode(['error' => $e->getMessage()]);
+            $result = json_encode(['error' => $e->getMessage()]);
+
+            return false !== $result ? $result : '{"error": "JSON encoding failed"}';
         }
+    }
+
+    /**
+     * @param \ReflectionClass<object> $reflection
+     * @return array<string, mixed>
+     */
+    private function buildBasicResult(\ReflectionClass $reflection): array
+    {
+        return [
+            'class_name' => $reflection->getName(),
+            'namespace' => $reflection->getNamespaceName(),
+            'methods' => [],
+            'properties' => [],
+        ];
+    }
+
+    /**
+     * @param \ReflectionClass<object> $reflection
+     * @return array<int, array<string, mixed>>
+     */
+    private function analyzeMethods(\ReflectionClass $reflection): array
+    {
+        $methods = [];
+
+        foreach ($reflection->getMethods() as $method) {
+            $methods[] = $this->analyzeMethod($method);
+        }
+
+        return $methods;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function analyzeMethod(\ReflectionMethod $method): array
+    {
+        return [
+            'name' => $method->getName(),
+            'visibility' => $this->getVisibility($method),
+            'parameters' => $this->analyzeParameters($method),
+            'return_type' => $this->getReturnType($method),
+            'doc_comment' => $method->getDocComment(),
+        ];
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function analyzeParameters(\ReflectionMethod $method): array
+    {
+        return array_map(function ($param) {
+            return $this->analyzeParameter($param);
+        }, $method->getParameters());
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function analyzeParameter(\ReflectionParameter $param): array
+    {
+        $type = $param->getType();
+
+        return [
+            'name' => $param->getName(),
+            'type' => $type instanceof \ReflectionType ? (string) $type : 'mixed',
+        ];
+    }
+
+    private function getReturnType(\ReflectionMethod $method): string
+    {
+        $returnType = $method->getReturnType();
+
+        return $returnType instanceof \ReflectionType ? (string) $returnType : 'mixed';
+    }
+
+    /**
+     * @param \ReflectionClass<object> $reflection
+     * @return array<int, array<string, mixed>>
+     */
+    private function analyzeProperties(\ReflectionClass $reflection): array
+    {
+        $properties = [];
+
+        foreach ($reflection->getProperties() as $property) {
+            $properties[] = $this->analyzeProperty($property);
+        }
+
+        return $properties;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function analyzeProperty(\ReflectionProperty $property): array
+    {
+        $type = $property->getType();
+
+        return [
+            'name' => $property->getName(),
+            'visibility' => $this->getVisibility($property),
+            'type' => $type instanceof \ReflectionType ? (string) $type : 'mixed',
+            'doc_comment' => $property->getDocComment(),
+        ];
     }
 
     private function getClassNameFromFile(string $filepath): string
     {
         $content = file_get_contents($filepath);
-        if (preg_match('/namespace\s+([^;]+);.*class\s+([^\s{]+)/s', $content, $matches)) {
+        if (false === $content) {
+            throw CodeAnalysisException::classNotFound($filepath);
+        }
+        if (1 === preg_match('/namespace\s+([^;]+);.*class\s+([^\s{]+)/s', $content, $matches)) {
             return $matches[1] . '\\' . $matches[2];
         }
         throw CodeAnalysisException::classNotFound($filepath);
     }
 
-    private function getVisibility($reflection): string
+    /**
+     * @param \ReflectionMethod|\ReflectionProperty $reflection
+     */
+    private function getVisibility(\ReflectionMethod|\ReflectionProperty $reflection): string
     {
         if ($reflection->isPublic()) {
             return 'public';

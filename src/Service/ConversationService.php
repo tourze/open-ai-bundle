@@ -32,14 +32,15 @@ class ConversationService
         $conversation->setSystemPrompt($character->getSystemPrompt());
         $conversation->setValid(true);
 
-        if (!empty($character->getSystemPrompt())) {
+        $systemPrompt = $character->getSystemPrompt();
+        if ('' !== $systemPrompt) {
             // 设置角色的系统提示词
             $message = new Message();
             $message->setApiKey($apiKey);
             $message->setModel($apiKey->getModel());
             $message->setMsgId(Uuid::v4()->toRfc4122());
             $message->setRole(RoleEnum::system);
-            $message->setContent($character->getSystemPrompt());
+            $message->setContent($systemPrompt);
             $conversation->addMessage($message);
         }
 
@@ -127,6 +128,9 @@ class ConversationService
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function getMessageArray(Conversation $conversation): array
     {
         $result = [];

@@ -3,53 +3,60 @@
 namespace OpenAIBundle\Tests\AiFunction;
 
 use OpenAIBundle\AiFunction\GetServerTimeZone;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use Tourze\MCPContracts\ToolInterface;
 
-class GetServerTimeZoneTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(GetServerTimeZone::class)]
+final class GetServerTimeZoneTest extends TestCase
 {
     private GetServerTimeZone $function;
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->function = new GetServerTimeZone();
     }
 
-    public function testGetName_returnsCorrectName(): void
+    public function testGetNameReturnsCorrectName(): void
     {
         $this->assertEquals('GetServerTimeZone', $this->function->getName());
     }
 
-    public function testGetDescription_returnsCorrectDescription(): void
+    public function testGetDescriptionReturnsCorrectDescription(): void
     {
         $this->assertEquals('获取服务器当前时区信息', $this->function->getDescription());
     }
 
-    public function testGetParameters_returnsEmptyParameters(): void
+    public function testGetParametersReturnsEmptyParameters(): void
     {
         $parameters = iterator_to_array($this->function->getParameters());
-        
+
         $this->assertEmpty($parameters);
         $this->assertCount(0, $parameters);
     }
 
-    public function testExecute_returnsCurrentTimeZone(): void
+    public function testExecuteReturnsCurrentTimeZone(): void
     {
         $result = $this->function->execute();
         $this->assertNotEmpty($result);
-        
+
         // 验证返回的是有效的时区标识符
         $timeZones = timezone_identifiers_list();
         $this->assertContains($result, $timeZones, '返回的时区应该是有效的时区标识符');
     }
 
-    public function testExecute_withParameters(): void
+    public function testExecuteWithParameters(): void
     {
         $parameters = ['unused' => 'parameter'];
         $result = $this->function->execute($parameters);
         $this->assertNotEmpty($result);
     }
 
-    public function testExecute_returnsConsistentResult(): void
+    public function testExecuteReturnsConsistentResult(): void
     {
         $result1 = $this->function->execute();
         $result2 = $this->function->execute();
@@ -58,12 +65,12 @@ class GetServerTimeZoneTest extends TestCase
         $this->assertEquals($result1, $result2);
     }
 
-    public function testExecute_returnsValidTimeZoneFormat(): void
+    public function testExecuteReturnsValidTimeZoneFormat(): void
     {
         $result = $this->function->execute();
 
         // 验证时区格式，通常是 "Area/Location" 格式
-        if (strpos($result, '/') !== false) {
+        if (false !== strpos($result, '/')) {
             $parts = explode('/', $result);
             $this->assertGreaterThanOrEqual(2, count($parts), '时区应该包含区域和位置');
             $this->assertNotEmpty($parts[0], '时区区域不能为空');
@@ -74,7 +81,7 @@ class GetServerTimeZoneTest extends TestCase
         }
     }
 
-    public function testExecute_canCreateDateTimeZone(): void
+    public function testExecuteCanCreateDateTimeZone(): void
     {
         $result = $this->function->execute();
 
@@ -83,7 +90,7 @@ class GetServerTimeZoneTest extends TestCase
         new \DateTimeZone($result);
     }
 
-    public function testExecute_matchesPhpDefaultTimeZone(): void
+    public function testExecuteMatchesPhpDefaultTimeZone(): void
     {
         $result = $this->function->execute();
         $phpTimeZone = date_default_timezone_get();
@@ -91,16 +98,15 @@ class GetServerTimeZoneTest extends TestCase
         $this->assertEquals($phpTimeZone, $result, '应该返回PHP默认时区');
     }
 
-    public function testFunction_implementsInterface(): void
+    public function testFunctionImplementsInterface(): void
     {
-        $this->assertInstanceOf(\Tourze\MCPContracts\ToolInterface::class, $this->function);
+        $this->assertInstanceOf(ToolInterface::class, $this->function);
     }
 
-
-    public function testExecute_withCommonTimeZones(): void
+    public function testExecuteWithCommonTimeZones(): void
     {
         $result = $this->function->execute();
-        
+
         $commonTimeZones = [
             'UTC',
             'America/New_York',
@@ -109,24 +115,25 @@ class GetServerTimeZoneTest extends TestCase
             'Europe/Berlin',
             'Asia/Tokyo',
             'Asia/Shanghai',
-            'Australia/Sydney'
+            'Australia/Sydney',
         ];
 
         // 如果不是常见时区之一，至少应该是有效的时区
-        if (!in_array($result, $commonTimeZones)) {
-            $this->assertTrue(
-                in_array($result, timezone_identifiers_list()),
-                "时区 '$result' 应该是有效的时区标识符"
+        if (!in_array($result, $commonTimeZones, true)) {
+            $this->assertContains(
+                $result,
+                timezone_identifiers_list(),
+                "时区 '{$result}' 应该是有效的时区标识符"
             );
         } else {
             $this->assertContains($result, $commonTimeZones);
         }
     }
 
-    public function testExecute_offsetInformation(): void
+    public function testExecuteOffsetInformation(): void
     {
         $result = $this->function->execute();
-        
+
         $timezone = new \DateTimeZone($result);
         $now = new \DateTime('now', $timezone);
         $offset = $timezone->getOffset($now);
@@ -136,10 +143,10 @@ class GetServerTimeZoneTest extends TestCase
         $this->assertLessThanOrEqual(14 * 3600, $offset, '时区偏移不应该大于+14小时');
     }
 
-    public function testExecute_timeZoneAbbreviation(): void
+    public function testExecuteTimeZoneAbbreviation(): void
     {
         $result = $this->function->execute();
-        
+
         $timezone = new \DateTimeZone($result);
         $now = new \DateTime('now', $timezone);
         $abbreviation = $timezone->getName();
@@ -147,54 +154,54 @@ class GetServerTimeZoneTest extends TestCase
         $this->assertEquals($result, $abbreviation, '时区名称应该一致');
     }
 
-    public function testConstant_nameValue(): void
+    public function testConstantNameValue(): void
     {
         $this->assertEquals('GetServerTimeZone', GetServerTimeZone::NAME);
     }
 
-    public function testExecute_daylightSavingTimeHandling(): void
+    public function testExecuteDaylightSavingTimeHandling(): void
     {
         $result = $this->function->execute();
-        
+
         $timezone = new \DateTimeZone($result);
         $summer = new \DateTime('2023-07-01', $timezone);
         $winter = new \DateTime('2023-01-01', $timezone);
-        
+
         $summerOffset = $timezone->getOffset($summer);
         $winterOffset = $timezone->getOffset($winter);
 
         // 验证夏令时处理（如果适用）
         $this->assertIsInt($summerOffset);
         $this->assertIsInt($winterOffset);
-        
+
         // 夏令时偏移差不应该超过2小时
         $difference = abs($summerOffset - $winterOffset);
         $this->assertLessThanOrEqual(2 * 3600, $difference, '夏令时偏移差不应该超过2小时');
     }
 
-    public function testExecute_multipleCallsNoSideEffects(): void
+    public function testExecuteMultipleCallsNoSideEffects(): void
     {
         $originalTimezone = date_default_timezone_get();
-        
+
         // 执行多次函数调用
-        for ($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < 5; ++$i) {
             $this->function->execute();
         }
-        
+
         // 验证没有副作用
         $this->assertEquals($originalTimezone, date_default_timezone_get(), '函数执行不应该改变系统时区设置');
     }
 
-    public function testExecute_performanceIsAcceptable(): void
+    public function testExecutePerformanceIsAcceptable(): void
     {
         $startTime = microtime(true);
-        
+
         $this->function->execute();
-        
+
         $endTime = microtime(true);
         $executionTime = $endTime - $startTime;
-        
+
         // 函数应该在1秒内完成
         $this->assertLessThan(1.0, $executionTime, '函数执行时间应该少于1秒');
     }
-} 
+}

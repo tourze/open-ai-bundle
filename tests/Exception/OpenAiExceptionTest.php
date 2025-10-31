@@ -3,103 +3,115 @@
 namespace OpenAIBundle\Tests\Exception;
 
 use OpenAIBundle\Exception\OpenAiException;
-use PHPUnit\Framework\TestCase;
+use OpenAIBundle\Exception\OpenAiGenericException;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Tourze\PHPUnitBase\AbstractExceptionTestCase;
 
-class OpenAiExceptionTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(OpenAiException::class)]
+final class OpenAiExceptionTest extends AbstractExceptionTestCase
 {
-    public function test_openAiException_isInstanceOfRuntimeException(): void
+    protected function getExceptionClass(): string
     {
-        $exception = new OpenAiException('Test message');
-
-        $this->assertInstanceOf(\RuntimeException::class, $exception);
+        return OpenAiException::class;
     }
 
-    public function test_openAiException_preservesMessage(): void
+    public function testOpenAiExceptionIsInstanceOfRuntimeException(): void
+    {
+        $exception = new OpenAiGenericException('Test message');
+
+        $this->assertInstanceOf(\RuntimeException::class, $exception);
+        $this->assertInstanceOf(OpenAiException::class, $exception);
+    }
+
+    public function testOpenAiExceptionPreservesMessage(): void
     {
         $message = 'Test error message';
-        $exception = new OpenAiException($message);
+        $exception = new OpenAiGenericException($message);
 
         $this->assertEquals($message, $exception->getMessage());
     }
 
-    public function test_openAiException_preservesCode(): void
+    public function testOpenAiExceptionPreservesCode(): void
     {
         $code = 123;
-        $exception = new OpenAiException('Test message', $code);
+        $exception = new OpenAiGenericException('Test message', $code);
 
         $this->assertEquals($code, $exception->getCode());
     }
 
-    public function test_openAiException_preservesPreviousException(): void
+    public function testOpenAiExceptionPreservesPreviousException(): void
     {
         $previous = new \Exception('Previous exception');
-        $exception = new OpenAiException('Test message', 0, $previous);
+        $exception = new OpenAiGenericException('Test message', 0, $previous);
 
         $this->assertSame($previous, $exception->getPrevious());
     }
 
-    public function test_apiRequestFailed_createsExceptionWithFormattedMessage(): void
+    public function testApiRequestFailedCreatesExceptionWithFormattedMessage(): void
     {
         $message = 'Connection timeout';
-        $exception = OpenAiException::apiRequestFailed($message);
+        $exception = OpenAiGenericException::apiRequestFailed($message);
 
         $this->assertInstanceOf(OpenAiException::class, $exception);
         $this->assertEquals('OpenAi API请求失败: Connection timeout', $exception->getMessage());
     }
 
-    public function test_apiRequestFailed_withEmptyMessage(): void
+    public function testApiRequestFailedWithEmptyMessage(): void
     {
-        $exception = OpenAiException::apiRequestFailed('');
+        $exception = OpenAiGenericException::apiRequestFailed('');
 
         $this->assertEquals('OpenAi API请求失败: ', $exception->getMessage());
     }
 
-    public function test_apiRequestFailed_withSpecialCharacters(): void
+    public function testApiRequestFailedWithSpecialCharacters(): void
     {
         $message = 'Error with "quotes" and <tags>';
-        $exception = OpenAiException::apiRequestFailed($message);
+        $exception = OpenAiGenericException::apiRequestFailed($message);
 
         $this->assertEquals('OpenAi API请求失败: Error with "quotes" and <tags>', $exception->getMessage());
     }
 
-    public function test_invalidConfiguration_createsExceptionWithFormattedMessage(): void
+    public function testInvalidConfigurationCreatesExceptionWithFormattedMessage(): void
     {
         $message = 'Missing API key';
-        $exception = OpenAiException::invalidConfiguration($message);
+        $exception = OpenAiGenericException::invalidConfiguration($message);
 
         $this->assertInstanceOf(OpenAiException::class, $exception);
         $this->assertEquals('OpenAi配置无效: Missing API key', $exception->getMessage());
     }
 
-    public function test_invalidConfiguration_withEmptyMessage(): void
+    public function testInvalidConfigurationWithEmptyMessage(): void
     {
-        $exception = OpenAiException::invalidConfiguration('');
+        $exception = OpenAiGenericException::invalidConfiguration('');
 
         $this->assertEquals('OpenAi配置无效: ', $exception->getMessage());
     }
 
-    public function test_invalidConfiguration_withComplexMessage(): void
+    public function testInvalidConfigurationWithComplexMessage(): void
     {
         $message = 'API key format is invalid: should start with "sk-"';
-        $exception = OpenAiException::invalidConfiguration($message);
+        $exception = OpenAiGenericException::invalidConfiguration($message);
 
         $this->assertEquals('OpenAi配置无效: API key format is invalid: should start with "sk-"', $exception->getMessage());
     }
 
-    public function test_openAiException_canBeThrown(): void
+    public function testOpenAiExceptionCanBeThrown(): void
     {
         $this->expectException(OpenAiException::class);
         $this->expectExceptionMessage('Test exception');
 
-        throw new OpenAiException('Test exception');
+        throw new OpenAiGenericException('Test exception');
     }
 
-    public function test_openAiException_canBeCaught(): void
+    public function testOpenAiExceptionCanBeCaught(): void
     {
         $caught = false;
 
         try {
-            throw new OpenAiException('Test exception');
+            throw new OpenAiGenericException('Test exception');
         } catch (OpenAiException $e) {
             $caught = true;
             $this->assertEquals('Test exception', $e->getMessage());
@@ -108,45 +120,45 @@ class OpenAiExceptionTest extends TestCase
         $this->assertTrue($caught, 'Exception should have been caught');
     }
 
-    public function test_apiRequestFailed_canBeThrown(): void
+    public function testApiRequestFailedCanBeThrown(): void
     {
         $this->expectException(OpenAiException::class);
         $this->expectExceptionMessage('OpenAi API请求失败: Network error');
 
-        throw OpenAiException::apiRequestFailed('Network error');
+        throw OpenAiGenericException::apiRequestFailed('Network error');
     }
 
-    public function test_invalidConfiguration_canBeThrown(): void
+    public function testInvalidConfigurationCanBeThrown(): void
     {
         $this->expectException(OpenAiException::class);
         $this->expectExceptionMessage('OpenAi配置无效: Invalid API endpoint');
 
-        throw OpenAiException::invalidConfiguration('Invalid API endpoint');
+        throw OpenAiGenericException::invalidConfiguration('Invalid API endpoint');
     }
 
-    public function test_openAiException_withMultilineMessage(): void
+    public function testOpenAiExceptionWithMultilineMessage(): void
     {
         $message = "Line 1\nLine 2\nLine 3";
-        $exception = new OpenAiException($message);
+        $exception = new OpenAiGenericException($message);
 
         $this->assertEquals($message, $exception->getMessage());
     }
 
-    public function test_openAiException_withUnicodeMessage(): void
+    public function testOpenAiExceptionWithUnicodeMessage(): void
     {
         $message = '错误信息包含中文字符和 emoji 🚫';
-        $exception = new OpenAiException($message);
+        $exception = new OpenAiGenericException($message);
 
         $this->assertEquals($message, $exception->getMessage());
     }
 
-    public function test_staticFactoryMethods_returnSameClassInstance(): void
+    public function testStaticFactoryMethodsReturnSameClassInstance(): void
     {
-        $exception1 = OpenAiException::apiRequestFailed('test');
-        $exception2 = OpenAiException::invalidConfiguration('test');
+        $exception1 = OpenAiGenericException::apiRequestFailed('test');
+        $exception2 = OpenAiGenericException::invalidConfiguration('test');
 
         $this->assertInstanceOf(OpenAiException::class, $exception1);
         $this->assertInstanceOf(OpenAiException::class, $exception2);
-        $this->assertEquals(get_class($exception1), get_class($exception2));
+        $this->assertInstanceOf(get_class($exception1), $exception2);
     }
-} 
+}

@@ -2,6 +2,8 @@
 
 namespace OpenAIBundle\VO;
 
+use OpenAIBundle\Exception\DataValidationException;
+
 class UsageVO
 {
     public function __construct(
@@ -11,8 +13,15 @@ class UsageVO
     ) {
     }
 
+    /**
+     * @param array<string, mixed> $data
+     */
     public static function fromArray(array $data): self
     {
+        if (!isset($data['prompt_tokens'], $data['completion_tokens'], $data['total_tokens'])) {
+            throw DataValidationException::missingRequiredFields('Missing required fields in usage data');
+        }
+
         return new self(
             $data['prompt_tokens'],
             $data['completion_tokens'],

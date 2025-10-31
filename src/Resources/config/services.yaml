@@ -10,8 +10,6 @@ services:
     resource: '../../Command/'
   OpenAIBundle\Controller\:
     resource: '../../Controller/'
-  OpenAIBundle\DataFixtures\:
-    resource: '../../DataFixtures/'
   OpenAIBundle\Procedure\:
     resource: '../../Procedure/'
   OpenAIBundle\Repository\:

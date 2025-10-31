@@ -29,25 +29,67 @@ class ReadTextFile implements ToolInterface
         $filepath = $parameters['filepath'] ?? '';
         $encoding = $parameters['encoding'] ?? 'UTF-8';
 
+        $errorMessage = $this->validateFile($filepath);
+        if (null !== $errorMessage) {
+            return $this->encodeError($errorMessage);
+        }
+
+        $content = $this->readFileContent($filepath);
+        if (null === $content) {
+            return $this->encodeError('读取文件失败');
+        }
+
+        $content = $this->convertEncoding($content, $encoding);
+
+        return $this->encodeResult($content);
+    }
+
+    private function validateFile(string $filepath): ?string
+    {
         if (!file_exists($filepath)) {
-            return json_encode(['error' => '文件不存在']);
+            return '文件不存在';
         }
 
         if (!is_readable($filepath)) {
-            return json_encode(['error' => '文件不可读']);
+            return '文件不可读';
         }
 
+        return null;
+    }
+
+    private function readFileContent(string $filepath): ?string
+    {
         $content = file_get_contents($filepath);
 
-        // 如果指定的编码不是 UTF-8，进行转换
+        return false !== $content ? $content : null;
+    }
+
+    private function convertEncoding(string $content, string $encoding): string
+    {
         if ('UTF-8' !== strtoupper($encoding)) {
-            $content = mb_convert_encoding($content, 'UTF-8', $encoding);
+            $converted = mb_convert_encoding($content, 'UTF-8', $encoding);
+
+            return false !== $converted ? $converted : $content;
         }
 
-        return json_encode([
+        return $content;
+    }
+
+    private function encodeError(string $message): string
+    {
+        $result = json_encode(['error' => $message]);
+
+        return false !== $result ? $result : '';
+    }
+
+    private function encodeResult(string $content): string
+    {
+        $result = json_encode([
             'content' => $content,
             'size' => strlen($content),
             'encoding' => 'UTF-8',
         ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+
+        return false !== $result ? $result : '';
     }
 }

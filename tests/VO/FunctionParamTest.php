@@ -4,11 +4,16 @@ namespace OpenAIBundle\Tests\VO;
 
 use OpenAIBundle\Enum\FunctionParamType;
 use OpenAIBundle\VO\FunctionParam;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-class FunctionParamTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(FunctionParam::class)]
+final class FunctionParamTest extends TestCase
 {
-    public function testConstructor_setsAllProperties(): void
+    public function testConstructorSetsAllProperties(): void
     {
         $name = 'testParam';
         $type = FunctionParamType::string;
@@ -23,7 +28,7 @@ class FunctionParamTest extends TestCase
         $this->assertTrue($param->isRequired());
     }
 
-    public function testGetName_returnsCorrectName(): void
+    public function testGetNameReturnsCorrectName(): void
     {
         $param = new FunctionParam(
             'locationParam',
@@ -35,7 +40,7 @@ class FunctionParamTest extends TestCase
         $this->assertEquals('locationParam', $param->getName());
     }
 
-    public function testGetType_returnsCorrectType(): void
+    public function testGetTypeReturnsCorrectType(): void
     {
         $param = new FunctionParam(
             'count',
@@ -47,7 +52,7 @@ class FunctionParamTest extends TestCase
         $this->assertEquals(FunctionParamType::integer, $param->getType());
     }
 
-    public function testGetDescription_returnsCorrectDescription(): void
+    public function testGetDescriptionReturnsCorrectDescription(): void
     {
         $description = 'This is a detailed parameter description';
         $param = new FunctionParam(
@@ -60,7 +65,7 @@ class FunctionParamTest extends TestCase
         $this->assertEquals($description, $param->getDescription());
     }
 
-    public function testIsRequired_returnsTrueForRequiredParam(): void
+    public function testIsRequiredReturnsTrueForRequiredParam(): void
     {
         $param = new FunctionParam(
             'requiredParam',
@@ -72,7 +77,7 @@ class FunctionParamTest extends TestCase
         $this->assertTrue($param->isRequired());
     }
 
-    public function testIsRequired_returnsFalseForOptionalParam(): void
+    public function testIsRequiredReturnsFalseForOptionalParam(): void
     {
         $param = new FunctionParam(
             'optionalParam',
@@ -84,7 +89,7 @@ class FunctionParamTest extends TestCase
         $this->assertFalse($param->isRequired());
     }
 
-    public function testStringType_functionParam(): void
+    public function testStringTypeFunctionParam(): void
     {
         $param = new FunctionParam(
             'textInput',
@@ -99,7 +104,7 @@ class FunctionParamTest extends TestCase
         $this->assertTrue($param->isRequired());
     }
 
-    public function testIntegerType_functionParam(): void
+    public function testIntegerTypeFunctionParam(): void
     {
         $param = new FunctionParam(
             'numericValue',
@@ -114,7 +119,7 @@ class FunctionParamTest extends TestCase
         $this->assertFalse($param->isRequired());
     }
 
-    public function testBooleanType_functionParam(): void
+    public function testBooleanTypeFunctionParam(): void
     {
         $param = new FunctionParam(
             'enableFlag',
@@ -231,7 +236,7 @@ class FunctionParamTest extends TestCase
 
         // 由于是不同的对象实例，它们不相等
         $this->assertNotSame($param1, $param2);
-        
+
         // 但属性值相同
         $this->assertEquals($param1->getName(), $param2->getName());
         $this->assertEquals($param1->getType(), $param2->getType());
@@ -264,20 +269,20 @@ class FunctionParamTest extends TestCase
         ];
 
         $this->assertCount(3, $params);
-        
+
         // 验证第一个参数（必需的字符串）
         $this->assertEquals('query', $params[0]->getName());
         $this->assertEquals(FunctionParamType::string, $params[0]->getType());
         $this->assertTrue($params[0]->isRequired());
-        
+
         // 验证第二个参数（可选的整数）
         $this->assertEquals('limit', $params[1]->getName());
         $this->assertEquals(FunctionParamType::integer, $params[1]->getType());
         $this->assertFalse($params[1]->isRequired());
-        
+
         // 验证第三个参数（可选的布尔值）
         $this->assertEquals('strict_mode', $params[2]->getName());
         $this->assertEquals(FunctionParamType::boolean, $params[2]->getType());
         $this->assertFalse($params[2]->isRequired());
     }
-} 
+}

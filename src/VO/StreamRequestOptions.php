@@ -8,29 +8,39 @@ namespace OpenAIBundle\VO;
 class StreamRequestOptions
 {
     private bool $debug = false;
+
     private ?string $model = null;
+
     private float $temperature = 0.7;
+
     private float $topP = 1.0;
+
     private int $maxTokens = 2000;
+
     private float $presencePenalty = 0.0;
+
     private float $frequencyPenalty = 0.0;
+
     /** @var array<int, array{type: string, function?: array<string, mixed>}>|null */
     private ?array $tools = null;
+
     private bool $stream = true;
+
     /** @var array<string, mixed> */
     private array $streamOptions = [
         'include_usage' => true,
     ];
-    
+
     /**
      * 额外的自定义选项
+     *
      * @var array<string, mixed>
      */
     private array $extraOptions = [];
 
     /**
      * @param array<int, array{type: string, function?: array<string, mixed>}>|null $tools
-     * @param array<string, mixed>|null $extraOptions
+     * @param array<string, mixed>|null                                             $extraOptions
      */
     public function __construct(
         ?bool $debug = null,
@@ -43,48 +53,60 @@ class StreamRequestOptions
         ?array $tools = null,
         ?array $extraOptions = null,
     ) {
-        if (null !== $debug) {
-            $this->debug = $debug;
-        }
-        if (null !== $model) {
-            $this->model = $model;
-        }
-        if (null !== $temperature) {
-            $this->temperature = $temperature;
-        }
-        if (null !== $topP) {
-            $this->topP = $topP;
-        }
-        if (null !== $maxTokens) {
-            $this->maxTokens = $maxTokens;
-        }
-        if (null !== $presencePenalty) {
-            $this->presencePenalty = $presencePenalty;
-        }
-        if (null !== $frequencyPenalty) {
-            $this->frequencyPenalty = $frequencyPenalty;
-        }
-        if (null !== $tools) {
-            $this->tools = $tools;
-        }
-        if (null !== $extraOptions) {
-            $this->extraOptions = $extraOptions;
+        $this->initializeProperties([
+            'debug' => $debug,
+            'model' => $model,
+            'temperature' => $temperature,
+            'topP' => $topP,
+            'maxTokens' => $maxTokens,
+            'presencePenalty' => $presencePenalty,
+            'frequencyPenalty' => $frequencyPenalty,
+            'tools' => $tools,
+            'extraOptions' => $extraOptions,
+        ]);
+    }
+
+    /**
+     * @param array<string, mixed> $properties
+     */
+    private function initializeProperties(array $properties): void
+    {
+        foreach ($properties as $property => $value) {
+            if (null === $value) {
+                continue;
+            }
+
+            match ($property) {
+                'debug' => $this->debug = $value,
+                'model' => $this->model = $value,
+                'temperature' => $this->temperature = $value,
+                'topP' => $this->topP = $value,
+                'maxTokens' => $this->maxTokens = $value,
+                'presencePenalty' => $this->presencePenalty = $value,
+                'frequencyPenalty' => $this->frequencyPenalty = $value,
+                'tools' => $this->tools = $value,
+                'stream' => $this->stream = $value,
+                'streamOptions' => $this->streamOptions = $value,
+                'extraOptions' => $this->extraOptions = $value,
+                default => null,
+            };
         }
     }
 
     /**
      * 从数组创建实例
+     *
      * @param array<string, mixed> $options
      */
     public static function fromArray(array $options): self
     {
         $knownKeys = [
-            'debug', 'model', 'temperature', 'top_p', 'max_tokens', 
-            'presence_penalty', 'frequency_penalty', 'tools'
+            'debug', 'model', 'temperature', 'top_p', 'max_tokens',
+            'presence_penalty', 'frequency_penalty', 'tools',
         ];
-        
+
         $extraOptions = array_diff_key($options, array_flip($knownKeys));
-        
+
         return new self(
             debug: $options['debug'] ?? null,
             model: $options['model'] ?? null,
@@ -100,6 +122,7 @@ class StreamRequestOptions
 
     /**
      * 转换为 API 请求的数组格式
+     *
      * @return array<string, mixed>
      */
     public function toRequestArray(?string $defaultModel = null): array
@@ -128,10 +151,9 @@ class StreamRequestOptions
         return $this->debug;
     }
 
-    public function setDebug(bool $debug): self
+    public function setDebug(bool $debug): void
     {
         $this->debug = $debug;
-        return $this;
     }
 
     public function getModel(): ?string
@@ -139,10 +161,9 @@ class StreamRequestOptions
         return $this->model;
     }
 
-    public function setModel(?string $model): self
+    public function setModel(?string $model): void
     {
         $this->model = $model;
-        return $this;
     }
 
     public function getTemperature(): float
@@ -150,10 +171,9 @@ class StreamRequestOptions
         return $this->temperature;
     }
 
-    public function setTemperature(float $temperature): self
+    public function setTemperature(float $temperature): void
     {
         $this->temperature = $temperature;
-        return $this;
     }
 
     public function getTopP(): float
@@ -161,10 +181,9 @@ class StreamRequestOptions
         return $this->topP;
     }
 
-    public function setTopP(float $topP): self
+    public function setTopP(float $topP): void
     {
         $this->topP = $topP;
-        return $this;
     }
 
     public function getMaxTokens(): int
@@ -172,10 +191,9 @@ class StreamRequestOptions
         return $this->maxTokens;
     }
 
-    public function setMaxTokens(int $maxTokens): self
+    public function setMaxTokens(int $maxTokens): void
     {
         $this->maxTokens = $maxTokens;
-        return $this;
     }
 
     public function getPresencePenalty(): float
@@ -183,10 +201,9 @@ class StreamRequestOptions
         return $this->presencePenalty;
     }
 
-    public function setPresencePenalty(float $presencePenalty): self
+    public function setPresencePenalty(float $presencePenalty): void
     {
         $this->presencePenalty = $presencePenalty;
-        return $this;
     }
 
     public function getFrequencyPenalty(): float
@@ -194,10 +211,9 @@ class StreamRequestOptions
         return $this->frequencyPenalty;
     }
 
-    public function setFrequencyPenalty(float $frequencyPenalty): self
+    public function setFrequencyPenalty(float $frequencyPenalty): void
     {
         $this->frequencyPenalty = $frequencyPenalty;
-        return $this;
     }
 
     /**
@@ -211,10 +227,9 @@ class StreamRequestOptions
     /**
      * @param array<int, array{type: string, function?: array<string, mixed>}>|null $tools
      */
-    public function setTools(?array $tools): self
+    public function setTools(?array $tools): void
     {
         $this->tools = $tools;
-        return $this;
     }
 
     /**
@@ -228,9 +243,8 @@ class StreamRequestOptions
     /**
      * @param array<string, mixed> $extraOptions
      */
-    public function setExtraOptions(array $extraOptions): self
+    public function setExtraOptions(array $extraOptions): void
     {
         $this->extraOptions = $extraOptions;
-        return $this;
     }
 }

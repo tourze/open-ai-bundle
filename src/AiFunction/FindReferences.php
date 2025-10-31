@@ -32,7 +32,9 @@ class FindReferences implements ToolInterface
         $symbol_type = $parameters['symbol_type'] ?? 'all';
 
         if (!is_dir($search_path)) {
-            return json_encode(['error' => '搜索路径不存在']);
+            $result = json_encode(['error' => '搜索路径不存在']);
+
+            return false !== $result ? $result : '';
         }
 
         $references = [];
@@ -40,20 +42,28 @@ class FindReferences implements ToolInterface
 
         foreach ($files as $file) {
             $content = file_get_contents($file);
+            if (false === $content) {
+                continue;
+            }
             $matches = $this->findSymbolReferences($content, $symbol, $symbol_type);
 
-            if (!empty($matches)) {
+            if ([] !== $matches) {
                 $references[$file] = $matches;
             }
         }
 
-        return json_encode([
+        $result = json_encode([
             'symbol' => $symbol,
             'type' => $symbol_type,
             'references' => $references,
         ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+
+        return false !== $result ? $result : '';
     }
 
+    /**
+     * @return array<int, string>
+     */
     private function findPhpFiles(string $dir): array
     {
         $iterator = new \RecursiveIteratorIterator(
@@ -70,6 +80,9 @@ class FindReferences implements ToolInterface
         return $files;
     }
 
+    /**
+     * @return array<int, array<string, int|string>>
+     */
     private function findSymbolReferences(string $content, string $symbol, string $type): array
     {
         $references = [];
@@ -93,11 +106,11 @@ class FindReferences implements ToolInterface
     {
         switch ($type) {
             case 'class':
-                return preg_match("/\\b(new|extends|implements|use)\\s+.*\\b$symbol\\b/", $line);
+                return 1 === preg_match("/\\b(new|extends|implements|use)\\s+.*\\b{$symbol}\\b/", $line);
             case 'function':
-                return preg_match("/\\b$symbol\\s*\\(/", $line);
+                return 1 === preg_match("/\\b{$symbol}\\s*\\(/", $line);
             case 'constant':
-                return preg_match("/\\b(const|define)\\s+$symbol\\b/", $line);
+                return 1 === preg_match("/\\b(const|define)\\s+{$symbol}\\b/", $line);
             default:
                 return true;
         }

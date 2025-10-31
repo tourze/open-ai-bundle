@@ -8,10 +8,11 @@ use Tourze\EnumExtra\Labelable;
 use Tourze\EnumExtra\Selectable;
 use Tourze\EnumExtra\SelectTrait;
 
-enum RoleEnum: string implements Itemable, Labelable, Selectable
+enum RoleEnum: string implements Labelable, Itemable, Selectable
 {
     use ItemTrait;
     use SelectTrait;
+
     case system = 'system';
     case user = 'user';
     case assistant = 'assistant';

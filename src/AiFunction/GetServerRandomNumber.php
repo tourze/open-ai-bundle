@@ -26,7 +26,17 @@ class GetServerRandomNumber implements ToolInterface
 
     public function execute(array $parameters = []): string
     {
-        $result = rand($parameters['min'] ?? 0, $parameters['max'] ?? PHP_INT_MAX);
+        $min = $parameters['min'] ?? 0;
+        $max = $parameters['max'] ?? PHP_INT_MAX;
+
+        if (!is_int($min)) {
+            $min = 0;
+        }
+        if (!is_int($max)) {
+            $max = PHP_INT_MAX;
+        }
+
+        $result = rand($min, $max);
 
         // dump(__METHOD__, $parameters, $result);
         return (string) $result;

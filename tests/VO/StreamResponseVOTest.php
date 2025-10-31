@@ -2,10 +2,16 @@
 
 namespace OpenAIBundle\Tests\VO;
 
+use OpenAIBundle\VO\StreamChunkVO;
 use OpenAIBundle\VO\StreamResponseVO;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-class StreamResponseVOTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(StreamResponseVO::class)]
+final class StreamResponseVOTest extends TestCase
 {
     public function testCreateStreamResponseVO(): void
     {
@@ -17,7 +23,7 @@ class StreamResponseVOTest extends TestCase
         $choices = [];
         $usage = null;
 
-        $response = new StreamResponseVO($id, $created, $model, $systemFingerprint, $object, $choices, $usage);
+        $response = new StreamChunkVO($id, $created, $model, $systemFingerprint, $object, $choices, $usage);
 
         $this->assertInstanceOf(StreamResponseVO::class, $response);
         $this->assertEquals($id, $response->id);
@@ -31,8 +37,8 @@ class StreamResponseVOTest extends TestCase
     public function testGetMsgId(): void
     {
         $id = 'test-id';
-        $response = new StreamResponseVO($id, time(), 'gpt-4', 'fingerprint', 'chat.completion', [], null);
-        
+        $response = new StreamChunkVO($id, time(), 'gpt-4', 'fingerprint', 'chat.completion', [], null);
+
         $this->assertEquals($id, $response->getMsgId());
     }
 }

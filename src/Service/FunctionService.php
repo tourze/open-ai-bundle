@@ -2,24 +2,30 @@
 
 namespace OpenAIBundle\Service;
 
+use Monolog\Attribute\WithMonologChannel;
 use OpenAIBundle\Entity\Character;
 use OpenAIBundle\Enum\ToolType;
 use OpenAIBundle\VO\FunctionParam;
 use OpenAIBundle\VO\ToolCall;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\Attribute\TaggedIterator;
+use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Tourze\MCPContracts\ToolInterface;
 
-class FunctionService
+#[WithMonologChannel(channel: 'open_ai')]
+readonly class FunctionService
 {
+    /**
+     * @param iterable<ToolInterface> $aiFunctions
+     */
     public function __construct(
-        #[TaggedIterator(tag: ToolInterface::SERVICE_TAG_NAME)] private readonly iterable $aiFunctions,
-        private readonly LoggerInterface                                             $logger,
+        #[AutowireIterator(tag: ToolInterface::SERVICE_TAG_NAME)] private iterable $aiFunctions,
+        private LoggerInterface $logger,
     ) {
     }
 
     /**
      * 生成OpenAI需要的tools格式
+     * @return array<mixed>
      */
     public function generateToolsArray(Character $character): array
     {
@@ -28,7 +34,7 @@ class FunctionService
         foreach ($this->aiFunctions as $aiFunction) {
             /** @var ToolInterface $aiFunction */
             $supportFunctions = $character->getSupportFunctions();
-            if (null !== $supportFunctions && count($supportFunctions) > 0 && !in_array($aiFunction->getName(), $supportFunctions)) {
+            if (null !== $supportFunctions && count($supportFunctions) > 0 && !in_array($aiFunction->getName(), $supportFunctions, true)) {
                 continue;
             }
 
@@ -68,6 +74,9 @@ class FunctionService
         return '';
     }
 
+    /**
+     * @return array<mixed>
+     */
     private function generateFunctionArray(ToolInterface $aiFunction): array
     {
         $parameters = [
@@ -85,7 +94,7 @@ class FunctionService
                 'description' => $parameter->getDescription(),
             ];
         }
-        if (empty($parameters['properties'])) {
+        if ([] === $parameters['properties']) {
             $parameters['properties'] = (object) [];
         }
 

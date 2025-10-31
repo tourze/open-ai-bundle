@@ -27,4 +27,4 @@ class GetServerTimeZone implements ToolInterface
     {
         return date_default_timezone_get();
     }
-} 
+}

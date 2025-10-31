@@ -3,11 +3,16 @@
 namespace OpenAIBundle\Tests\VO;
 
 use OpenAIBundle\VO\StreamRequestOptions;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-class StreamRequestOptionsTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(StreamRequestOptions::class)]
+final class StreamRequestOptionsTest extends TestCase
 {
-    public function test_constructor_withDefaultValues(): void
+    public function testConstructorWithDefaultValues(): void
     {
         $options = new StreamRequestOptions();
 
@@ -22,7 +27,7 @@ class StreamRequestOptionsTest extends TestCase
         $this->assertEmpty($options->getExtraOptions());
     }
 
-    public function test_constructor_withCustomValues(): void
+    public function testConstructorWithCustomValues(): void
     {
         $tools = [
             ['type' => 'function', 'function' => ['name' => 'test']],
@@ -52,7 +57,7 @@ class StreamRequestOptionsTest extends TestCase
         $this->assertEquals($extraOptions, $options->getExtraOptions());
     }
 
-    public function test_fromArray_withAllFields(): void
+    public function testFromArrayWithAllFields(): void
     {
         $data = [
             'debug' => true,
@@ -79,7 +84,7 @@ class StreamRequestOptionsTest extends TestCase
         $this->assertEquals(['custom_option' => 'custom_value'], $options->getExtraOptions());
     }
 
-    public function test_fromArray_withPartialFields(): void
+    public function testFromArrayWithPartialFields(): void
     {
         $data = [
             'model' => 'gpt-3.5-turbo',
@@ -95,7 +100,7 @@ class StreamRequestOptionsTest extends TestCase
         $this->assertEquals(2000, $options->getMaxTokens());
     }
 
-    public function test_toRequestArray_withDefaultModel(): void
+    public function testToRequestArrayWithDefaultModel(): void
     {
         $options = new StreamRequestOptions(
             temperature: 0.8,
@@ -115,7 +120,7 @@ class StreamRequestOptionsTest extends TestCase
         $this->assertArrayNotHasKey('tools', $requestArray);
     }
 
-    public function test_toRequestArray_withCustomModel(): void
+    public function testToRequestArrayWithCustomModel(): void
     {
         $options = new StreamRequestOptions(
             model: 'custom-model',
@@ -126,7 +131,7 @@ class StreamRequestOptionsTest extends TestCase
         $this->assertEquals('custom-model', $requestArray['model']);
     }
 
-    public function test_toRequestArray_withTools(): void
+    public function testToRequestArrayWithTools(): void
     {
         $tools = [
             ['type' => 'function', 'function' => ['name' => 'test_function']],
@@ -139,7 +144,7 @@ class StreamRequestOptionsTest extends TestCase
         $this->assertEquals($tools, $requestArray['tools']);
     }
 
-    public function test_toRequestArray_withExtraOptions(): void
+    public function testToRequestArrayWithExtraOptions(): void
     {
         $options = new StreamRequestOptions(
             extraOptions: ['stop' => ["\n"], 'n' => 2],
@@ -153,7 +158,7 @@ class StreamRequestOptionsTest extends TestCase
         $this->assertEquals(2, $requestArray['n']);
     }
 
-    public function test_settersAndGetters(): void
+    public function testSettersAndGetters(): void
     {
         $options = new StreamRequestOptions();
 
@@ -187,13 +192,13 @@ class StreamRequestOptionsTest extends TestCase
         $this->assertEquals($extraOptions, $options->getExtraOptions());
     }
 
-    public function test_fluentInterface(): void
+    public function testFluentInterface(): void
     {
-        $options = (new StreamRequestOptions())
-            ->setDebug(true)
-            ->setModel('gpt-4')
-            ->setTemperature(0.9)
-            ->setMaxTokens(3000);
+        $options = new StreamRequestOptions();
+        $options->setDebug(true);
+        $options->setModel('gpt-4');
+        $options->setTemperature(0.9);
+        $options->setMaxTokens(3000);
 
         $this->assertTrue($options->isDebug());
         $this->assertEquals('gpt-4', $options->getModel());

@@ -4,6 +4,7 @@ namespace OpenAIBundle\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
 use OpenAIBundle\Entity\ApiKey;
+use OpenAIBundle\Entity\Conversation;
 use OpenAIBundle\Entity\Message;
 use OpenAIBundle\Enum\RoleEnum;
 use OpenAIBundle\Exception\ConfigurationException;
@@ -14,7 +15,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
-class ConversationChatController extends AbstractController
+final class ConversationChatController extends AbstractController
 {
     public function __construct(
         private readonly ConversationRepository $conversationRepository,
@@ -27,7 +28,7 @@ class ConversationChatController extends AbstractController
     public function __invoke(Request $request, int $id): JsonResponse
     {
         $conversation = $this->conversationRepository->find($id);
-        if (null === $conversation) {
+        if (!$conversation instanceof Conversation) {
             throw $this->createNotFoundException();
         }
 
@@ -36,7 +37,7 @@ class ConversationChatController extends AbstractController
         $apiKeyId = $content['apiKeyId'] ?? null;
 
         $apiKey = null === $apiKeyId ? null : $this->apiKeyRepository->find($apiKeyId);
-        if (null === $apiKey) {
+        if (!$apiKey instanceof ApiKey) {
             // 从 Character 获取默认的 API key
             $character = $conversation->getActor();
             if (null !== $character) {
@@ -45,7 +46,10 @@ class ConversationChatController extends AbstractController
         }
 
         if (!$apiKey instanceof ApiKey) {
-            throw ConfigurationException::configurationNotFound('API Key');
+            return $this->json([
+                'error' => 'No API key available',
+                'message' => 'API key is required for conversation',
+            ], 400);
         }
 
         $userMessage = new Message();
@@ -53,6 +57,8 @@ class ConversationChatController extends AbstractController
         $userMessage->setConversation($conversation);
         $userMessage->setRole(RoleEnum::user);
         $userMessage->setContent($message);
+        $userMessage->setModel($apiKey->getModel());
+        $userMessage->setApiKey($apiKey);
         $this->entityManager->persist($userMessage);
         $this->entityManager->flush();
 

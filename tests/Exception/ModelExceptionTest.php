@@ -3,19 +3,29 @@
 namespace OpenAIBundle\Tests\Exception;
 
 use OpenAIBundle\Exception\ModelException;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Tourze\PHPUnitBase\AbstractExceptionTestCase;
 
-class ModelExceptionTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(ModelException::class)]
+final class ModelExceptionTest extends AbstractExceptionTestCase
 {
-    public function testException_extendsCorrectBaseClass(): void
+    protected function getExceptionClass(): string
+    {
+        return ModelException::class;
+    }
+
+    public function testExceptionExtendsCorrectBaseClass(): void
     {
         $exception = new ModelException('Test message');
-        
+
         $this->assertInstanceOf(\Exception::class, $exception);
         $this->assertInstanceOf(\RuntimeException::class, $exception);
     }
 
-    public function testException_withMessage(): void
+    public function testExceptionWithMessage(): void
     {
         $message = 'Model error occurred';
         $exception = new ModelException($message);
@@ -23,7 +33,7 @@ class ModelExceptionTest extends TestCase
         $this->assertEquals($message, $exception->getMessage());
     }
 
-    public function testException_withMessageAndCode(): void
+    public function testExceptionWithMessageAndCode(): void
     {
         $message = 'Invalid model';
         $code = 2001;
@@ -33,12 +43,12 @@ class ModelExceptionTest extends TestCase
         $this->assertEquals($code, $exception->getCode());
     }
 
-    public function testException_withMessageCodeAndPrevious(): void
+    public function testExceptionWithMessageCodeAndPrevious(): void
     {
         $previousException = new \InvalidArgumentException('Previous error');
         $message = 'Model validation failed';
         $code = 3001;
-        
+
         $exception = new ModelException($message, $code, $previousException);
 
         $this->assertEquals($message, $exception->getMessage());
@@ -46,24 +56,24 @@ class ModelExceptionTest extends TestCase
         $this->assertSame($previousException, $exception->getPrevious());
     }
 
-    public function testException_defaultCode(): void
+    public function testExceptionDefaultCode(): void
     {
         $exception = new ModelException('Test message');
-        
+
         $this->assertEquals(0, $exception->getCode());
     }
 
-    public function testException_emptyMessage(): void
+    public function testExceptionEmptyMessage(): void
     {
         $exception = new ModelException('');
-        
+
         $this->assertEquals('', $exception->getMessage());
     }
 
-    public function testException_canBeThrownAndCaught(): void
+    public function testExceptionCanBeThrownAndCaught(): void
     {
         $message = 'Test model exception';
-        
+
         try {
             throw new ModelException($message);
         } catch (ModelException $e) {
@@ -72,10 +82,10 @@ class ModelExceptionTest extends TestCase
         }
     }
 
-    public function testException_canBeCaughtAsRuntimeException(): void
+    public function testExceptionCanBeCaughtAsRuntimeException(): void
     {
         $message = 'Runtime model error';
-        
+
         try {
             throw new ModelException($message);
         } catch (\RuntimeException $e) {
@@ -84,10 +94,10 @@ class ModelExceptionTest extends TestCase
         }
     }
 
-    public function testException_canBeCaughtAsGeneralException(): void
+    public function testExceptionCanBeCaughtAsGeneralException(): void
     {
         $message = 'General model error';
-        
+
         try {
             throw new ModelException($message);
         } catch (\Throwable $e) {
@@ -96,7 +106,7 @@ class ModelExceptionTest extends TestCase
         }
     }
 
-    public function testException_withModelSpecificMessage(): void
+    public function testExceptionWithModelSpecificMessage(): void
     {
         $message = 'Model "gpt-4" is not available in your region';
         $exception = new ModelException($message);
@@ -106,7 +116,7 @@ class ModelExceptionTest extends TestCase
         $this->assertStringContainsString('not available', $exception->getMessage());
     }
 
-    public function testException_withTokenLimitMessage(): void
+    public function testExceptionWithTokenLimitMessage(): void
     {
         $message = 'Token limit exceeded: 4096 tokens requested, but model supports maximum 2048 tokens';
         $exception = new ModelException($message);
@@ -116,7 +126,7 @@ class ModelExceptionTest extends TestCase
         $this->assertStringContainsString('4096', $exception->getMessage());
     }
 
-    public function testException_withUnicodeMessage(): void
+    public function testExceptionWithUnicodeMessage(): void
     {
         $message = '模型错误：不支持的模型类型 🚫 请选择有效模型 ⚙️';
         $exception = new ModelException($message);
@@ -126,51 +136,52 @@ class ModelExceptionTest extends TestCase
         $this->assertStringContainsString('不支持的模型类型', $exception->getMessage());
     }
 
-    public function testException_withJsonMessage(): void
+    public function testExceptionWithJsonMessage(): void
     {
         $errorData = [
             'error' => 'model_not_found',
             'model' => 'gpt-5',
-            'available_models' => ['gpt-3.5-turbo', 'gpt-4']
+            'available_models' => ['gpt-3.5-turbo', 'gpt-4'],
         ];
         $message = json_encode($errorData);
+        $this->assertNotFalse($message);
         $exception = new ModelException($message);
 
         $this->assertEquals($message, $exception->getMessage());
         $this->assertJson($exception->getMessage());
-        
+
         $decoded = json_decode($exception->getMessage(), true);
         $this->assertEquals('model_not_found', $decoded['error']);
         $this->assertEquals('gpt-5', $decoded['model']);
     }
 
-    public function testException_stackTraceContainsCorrectFile(): void
+    public function testExceptionStackTraceContainsCorrectFile(): void
     {
         try {
             throw new ModelException('Stack trace test');
         } catch (ModelException $e) {
             $trace = $e->getTrace();
             $this->assertNotEmpty($trace);
-            
+
             // 检查栈追踪包含测试文件相关信息
             $traceAsString = $e->getTraceAsString();
             $this->assertStringContainsString('ModelExceptionTest', $traceAsString);
         }
     }
 
-    public function testException_toStringFormat(): void
+    public function testExceptionToStringFormat(): void
     {
         $message = 'String representation test';
         $exception = new ModelException($message);
 
         $stringRepresentation = (string) $exception;
-        
+
         $this->assertStringContainsString('ModelException', $stringRepresentation);
         $this->assertStringContainsString($message, $stringRepresentation);
         $this->assertStringContainsString(__FILE__, $stringRepresentation);
     }
 
-    public function testException_chaining(): void
+    public function testExceptionChaining(): void
     {
         $rootCause = new \InvalidArgumentException('Root cause');
         $intermediate = new \RuntimeException('Intermediate', 0, $rootCause);
@@ -180,7 +191,7 @@ class ModelExceptionTest extends TestCase
         $this->assertSame($rootCause, $modelException->getPrevious()->getPrevious());
     }
 
-    public function testException_negativeCode(): void
+    public function testExceptionNegativeCode(): void
     {
         $message = 'Negative code test';
         $code = -500;
@@ -190,7 +201,7 @@ class ModelExceptionTest extends TestCase
         $this->assertEquals($message, $exception->getMessage());
     }
 
-    public function testException_largeCode(): void
+    public function testExceptionLargeCode(): void
     {
         $message = 'Large code test';
         $code = PHP_INT_MAX;
@@ -200,7 +211,7 @@ class ModelExceptionTest extends TestCase
         $this->assertEquals($message, $exception->getMessage());
     }
 
-    public function testException_multilineMessage(): void
+    public function testExceptionMultilineMessage(): void
     {
         $message = "Model error:\nLine 1: Invalid model name\nLine 2: Unsupported version\nLine 3: Rate limit exceeded";
         $exception = new ModelException($message);
@@ -210,7 +221,7 @@ class ModelExceptionTest extends TestCase
         $this->assertStringContainsString('Invalid model name', $exception->getMessage());
     }
 
-    public function testException_withApiKeyRelatedMessage(): void
+    public function testExceptionWithApiKeyRelatedMessage(): void
     {
         $message = 'Model access denied: API key does not have permission to use gpt-4';
         $exception = new ModelException($message);
@@ -220,7 +231,7 @@ class ModelExceptionTest extends TestCase
         $this->assertStringContainsString('permission', $exception->getMessage());
     }
 
-    public function testException_withRateLimitMessage(): void
+    public function testExceptionWithRateLimitMessage(): void
     {
         $message = 'Rate limit reached for model gpt-4: 3 requests per minute exceeded';
         $exception = new ModelException($message);
@@ -229,4 +240,4 @@ class ModelExceptionTest extends TestCase
         $this->assertStringContainsString('Rate limit', $exception->getMessage());
         $this->assertStringContainsString('3 requests', $exception->getMessage());
     }
-} 
+}

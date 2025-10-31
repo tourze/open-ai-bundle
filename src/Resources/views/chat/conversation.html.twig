@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ conversation.title }} - OpenAI Chat</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .conversation { max-width: 800px; margin: 0 auto; }
+        .message { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .message.user { background: #e3f2fd; }
+        .message.assistant { background: #f3e5f5; }
+        .message.system { background: #fff3e0; }
+        .tool-calls { margin-top: 10px; font-size: 0.9em; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="conversation">
+        <h1>{{ conversation.title }}</h1>
+        {% if conversation.description %}
+            <p><strong>Description:</strong> {{ conversation.description }}</p>
+        {% endif %}
+        
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message {{ message.role.value }}" data-message-id="{{ message.id }}">
+                    <strong>{{ message.role.value|title }}:</strong>
+                    <div class="message-content">{{ message.content|nl2br }}</div>
+                    {% if message.role.value == 'assistant' and message.toolCalls is not empty %}
+                        <div class="tool-calls">
+                            <strong>Tool Calls:</strong>
+                            {% for toolCall in message.toolCalls %}
+                                <div class="tool-call">{{ toolCall|json_encode }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            {% if messages is empty %}
+                <p>No messages in this conversation yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

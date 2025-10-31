@@ -9,6 +9,7 @@ class ToolCall
         private readonly string $index,
         private readonly string $type,
         private readonly string $functionName,
+        /** @var array<string, mixed> $functionArguments */
         private readonly array $functionArguments,
     ) {
     }
@@ -23,6 +24,9 @@ class ToolCall
         return $this->functionName;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getFunctionArguments(): array
     {
         return $this->functionArguments;

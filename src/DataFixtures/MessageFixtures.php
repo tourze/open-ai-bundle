@@ -19,13 +19,13 @@ class MessageFixtures extends Fixture implements DependentFixtureInterface
     {
         // 为通用聊天对话创建消息
         $this->createGeneralChatMessages($manager);
-        
+
         // 为翻译任务对话创建消息
         $this->createTranslationMessages($manager);
-        
+
         // 为编程帮助对话创建消息
         $this->createProgrammingMessages($manager);
-        
+
         // 为学习辅导对话创建消息
         $this->createLearningMessages($manager);
 

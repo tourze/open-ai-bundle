@@ -37,6 +37,7 @@ class AttributeControllerLoader extends Loader implements RoutingAutoLoaderInter
         $collection->addCollection($this->controllerLoader->load(ConversationPageController::class));
         $collection->addCollection($this->controllerLoader->load(ConversationMessagesController::class));
         $collection->addCollection($this->controllerLoader->load(ConversationChatController::class));
+
         return $collection;
     }
 

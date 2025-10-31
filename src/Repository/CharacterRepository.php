@@ -5,7 +5,12 @@ namespace OpenAIBundle\Repository;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use OpenAIBundle\Entity\Character;
+use Tourze\PHPUnitSymfonyKernelTest\Attribute\AsRepository;
 
+/**
+ * @extends ServiceEntityRepository<Character>
+ */
+#[AsRepository(entityClass: Character::class)]
 class CharacterRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -13,18 +18,37 @@ class CharacterRepository extends ServiceEntityRepository
         parent::__construct($registry, Character::class);
     }
 
+    public function save(Character $entity, bool $flush = true): void
+    {
+        $this->getEntityManager()->persist($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function remove(Character $entity, bool $flush = true): void
+    {
+        $this->getEntityManager()->remove($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
     /**
      * 获取所有激活的角色
      *
-     * @return Character[]
+     * @return array<Character>
      */
     public function findAllActive(): array
     {
         return $this->createQueryBuilder('c')
-            ->where('c.isActive = :active')
-            ->setParameter('active', true)
+            ->where('c.valid = :valid')
+            ->setParameter('valid', true)
             ->getQuery()
-            ->getResult();
+            ->getResult()
+        ;
     }
 
     /**
@@ -36,6 +60,7 @@ class CharacterRepository extends ServiceEntityRepository
             ->where('c.name = :name')
             ->setParameter('name', $name)
             ->getQuery()
-            ->getOneOrNullResult();
+            ->getOneOrNullResult()
+        ;
     }
 }

@@ -4,6 +4,9 @@ namespace OpenAIBundle\Exception;
 
 class ModelException extends OpenAiException
 {
+    /**
+     * @param array<string> $supportedModels
+     */
     public static function unsupportedModel(string $model, array $supportedModels): self
     {
         return new self(sprintf(

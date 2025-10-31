@@ -3,9 +3,14 @@
 namespace OpenAIBundle\Tests\VO;
 
 use OpenAIBundle\VO\FunctionDefinition;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-class FunctionDefinitionTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(FunctionDefinition::class)]
+final class FunctionDefinitionTest extends TestCase
 {
     public function testCreateFunctionDefinition(): void
     {

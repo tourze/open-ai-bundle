@@ -15,7 +15,6 @@ enum ContextLength: int implements Labelable, Itemable, Selectable
 {
     use ItemTrait;
     use SelectTrait;
-
     case K_4 = 4096;     // 4K
     case K_8 = 8192;     // 8K
     case K_16 = 16384;   // 16K

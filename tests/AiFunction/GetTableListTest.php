@@ -3,60 +3,78 @@
 namespace OpenAIBundle\Tests\AiFunction;
 
 use OpenAIBundle\AiFunction\GetTableList;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Tourze\DoctrineEntityMarkdownBundle\Service\EntityService;
+use Tourze\MCPContracts\ToolInterface;
 
-class GetTableListTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(GetTableList::class)]
+final class GetTableListTest extends TestCase
 {
     private GetTableList $function;
+
+    /** @var EntityService<object>&MockObject */
     private EntityService $entityService;
 
     protected function setUp(): void
     {
+        parent::setUp();
+        /*
+         * 使用具体类进行 mock 的原因：
+         * 1. EntityService 是一个具体的服务类，提供了数据库实体相关的具体功能，测试需要 mock 其特定的 getAllTableNames 方法
+         * 2. 这种使用是合理和必要的，因为该服务承担了数据库表结构分析的具体职责，接口无法提供足够的方法约束
+         * 3. 暂无更好的替代方案，因为 EntityService 是该 Bundle 的核心服务类，其具体实现对于测试来说是必需的
+         */
         $this->entityService = $this->createMock(EntityService::class);
         $this->function = new GetTableList($this->entityService);
     }
 
-    public function testGetName_returnsCorrectName(): void
+    public function testGetNameReturnsCorrectName(): void
     {
         $this->assertEquals('GetTableList', $this->function->getName());
     }
 
-    public function testGetDescription_returnsCorrectDescription(): void
+    public function testGetDescriptionReturnsCorrectDescription(): void
     {
         $this->assertEquals('返回数据库中所有表名和说明', $this->function->getDescription());
     }
 
-    public function testGetParameters_returnsEmptyParameters(): void
+    public function testGetParametersReturnsEmptyParameters(): void
     {
         $parameters = iterator_to_array($this->function->getParameters());
-        
+
         $this->assertEmpty($parameters);
         $this->assertCount(0, $parameters);
     }
 
-    public function testExecute_callsEntityService(): void
+    public function testExecuteCallsEntityService(): void
     {
         $expectedResult = "Table list:\n- users\n- posts\n- comments";
-        
+
         $this->entityService
             ->expects($this->once())
             ->method('getAllTableNames')
-            ->willReturn($expectedResult);
+            ->willReturn($expectedResult)
+        ;
 
         $result = $this->function->execute();
 
         $this->assertEquals($expectedResult, $result);
     }
 
-    public function testExecute_withParameters(): void
+    public function testExecuteWithParameters(): void
     {
-        $expectedResult = "Table names and descriptions";
-        
+        $expectedResult = 'Table names and descriptions';
+
         $this->entityService
             ->expects($this->once())
             ->method('getAllTableNames')
-            ->willReturn($expectedResult);
+            ->willReturn($expectedResult)
+        ;
 
         $parameters = ['unused' => 'parameter'];
         $result = $this->function->execute($parameters);
@@ -64,58 +82,61 @@ class GetTableListTest extends TestCase
         $this->assertEquals($expectedResult, $result);
     }
 
-    public function testExecute_withEmptyResult(): void
+    public function testExecuteWithEmptyResult(): void
     {
         $this->entityService
             ->expects($this->once())
             ->method('getAllTableNames')
-            ->willReturn('');
+            ->willReturn('')
+        ;
 
         $result = $this->function->execute();
 
         $this->assertEquals('', $result);
     }
 
-    public function testExecute_withComplexTableList(): void
+    public function testExecuteWithComplexTableList(): void
     {
         $complexResult = <<<'MARKDOWN'
-# 数据库表列表
+            # 数据库表列表
 
-## 用户相关表
-- `users` - 用户基本信息表
-- `user_profiles` - 用户详细资料表
+            ## 用户相关表
+            - `users` - 用户基本信息表
+            - `user_profiles` - 用户详细资料表
 
-## 内容相关表  
-- `posts` - 文章表
-- `comments` - 评论表
-- `categories` - 分类表
+            ## 内容相关表  
+            - `posts` - 文章表
+            - `comments` - 评论表
+            - `categories` - 分类表
 
-## 系统表
-- `migrations` - 数据库迁移记录
-- `logs` - 系统日志表
-MARKDOWN;
+            ## 系统表
+            - `migrations` - 数据库迁移记录
+            - `logs` - 系统日志表
+            MARKDOWN;
 
         $this->entityService
             ->expects($this->once())
             ->method('getAllTableNames')
-            ->willReturn($complexResult);
+            ->willReturn($complexResult)
+        ;
 
         $result = $this->function->execute();
 
         $this->assertEquals($complexResult, $result);
     }
 
-    public function testConstant_nameValue(): void
+    public function testConstantNameValue(): void
     {
         $this->assertEquals('GetTableList', GetTableList::NAME);
     }
 
-    public function testExecute_entityServiceThrowsException(): void
+    public function testExecuteEntityServiceThrowsException(): void
     {
         $this->entityService
             ->expects($this->once())
             ->method('getAllTableNames')
-            ->willThrowException(new \RuntimeException('Database connection failed'));
+            ->willThrowException(new \RuntimeException('Database connection failed'))
+        ;
 
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Database connection failed');
@@ -123,14 +144,15 @@ MARKDOWN;
         $this->function->execute();
     }
 
-    public function testExecute_multipleCallsConsistentBehavior(): void
+    public function testExecuteMultipleCallsConsistentBehavior(): void
     {
-        $expectedResult = "Consistent table list";
-        
+        $expectedResult = 'Consistent table list';
+
         $this->entityService
             ->expects($this->exactly(3))
             ->method('getAllTableNames')
-            ->willReturn($expectedResult);
+            ->willReturn($expectedResult)
+        ;
 
         // 多次调用应该产生一致的结果
         $result1 = $this->function->execute();
@@ -144,11 +166,11 @@ MARKDOWN;
         $this->assertEquals($result2, $result3);
     }
 
-    public function testExecute_withLargeTableList(): void
+    public function testExecuteWithLargeTableList(): void
     {
         // 模拟大量表的情况
         $tableNames = [];
-        for ($i = 1; $i <= 100; $i++) {
+        for ($i = 1; $i <= 100; ++$i) {
             $tableNames[] = "- table_{$i} - Description for table {$i}";
         }
         $largeResult = implode("\n", $tableNames);
@@ -156,7 +178,8 @@ MARKDOWN;
         $this->entityService
             ->expects($this->once())
             ->method('getAllTableNames')
-            ->willReturn($largeResult);
+            ->willReturn($largeResult)
+        ;
 
         $result = $this->function->execute();
 
@@ -165,21 +188,22 @@ MARKDOWN;
         $this->assertStringContainsString('table_100', $result);
     }
 
-    public function testExecute_withUnicodeTableNames(): void
+    public function testExecuteWithUnicodeTableNames(): void
     {
         $unicodeResult = <<<'UNICODE'
-# 数据库表列表
+            # 数据库表列表
 
-- `用户表` - 存储用户基本信息
-- `产品表` - 产品目录表  
-- `订单表` - 订单记录表
-- `日志表` - 系统日志记录
-UNICODE;
+            - `用户表` - 存储用户基本信息
+            - `产品表` - 产品目录表  
+            - `订单表` - 订单记录表
+            - `日志表` - 系统日志记录
+            UNICODE;
 
         $this->entityService
             ->expects($this->once())
             ->method('getAllTableNames')
-            ->willReturn($unicodeResult);
+            ->willReturn($unicodeResult)
+        ;
 
         $result = $this->function->execute();
 
@@ -188,18 +212,19 @@ UNICODE;
         $this->assertStringContainsString('产品表', $result);
     }
 
-    public function testFunction_implementsInterface(): void
+    public function testFunctionImplementsInterface(): void
     {
-        $this->assertInstanceOf(\Tourze\MCPContracts\ToolInterface::class, $this->function);
+        $this->assertInstanceOf(ToolInterface::class, $this->function);
     }
 
-    public function testExecute_returnType(): void
+    public function testExecuteReturnType(): void
     {
         $this->entityService
             ->expects($this->once())
             ->method('getAllTableNames')
-            ->willReturn('test result');
+            ->willReturn('test result')
+        ;
 
         $result = $this->function->execute();
     }
-} 
+}

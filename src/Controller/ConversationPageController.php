@@ -2,6 +2,7 @@
 
 namespace OpenAIBundle\Controller;
 
+use OpenAIBundle\Entity\Conversation;
 use OpenAIBundle\Repository\ConversationRepository;
 use OpenAIBundle\Repository\MessageRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -9,7 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-class ConversationPageController extends AbstractController
+final class ConversationPageController extends AbstractController
 {
     public function __construct(
         private readonly ConversationRepository $conversationRepository,
@@ -24,6 +25,7 @@ class ConversationPageController extends AbstractController
         if (null === $conversation) {
             throw $this->createNotFoundException();
         }
+        assert($conversation instanceof Conversation);
 
         $messages = $this->messageRepository->findByConversation($conversation);
 

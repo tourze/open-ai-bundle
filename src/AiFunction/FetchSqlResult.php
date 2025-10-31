@@ -35,10 +35,13 @@ class FetchSqlResult implements ToolInterface
         );
     }
 
+    /**
+     * @param array<string, mixed> $parameters
+     */
     public function execute(array $parameters = []): string
     {
         $sql = trim($parameters['sql'] ?? '');
-        if (empty($sql)) {
+        if ('' === $sql) {
             throw SqlQueryException::emptySql();
         }
 
@@ -57,28 +60,34 @@ class FetchSqlResult implements ToolInterface
             $stmt = $this->connection->executeQuery($sql);
             $results = $stmt->fetchAllAssociative();
 
-            if (empty($results)) {
-                return json_encode([
+            if ([] === $results) {
+                $encoded = json_encode([
                     'total' => 0,
                     'data' => [],
                     'sql' => $sql,
                 ], JSON_UNESCAPED_UNICODE);
+
+                return false !== $encoded ? $encoded : '{"error": "JSON encoding failed"}';
             }
 
             // 获取字段信息
             $columns = array_keys($results[0]);
 
-            return json_encode([
+            $encoded = json_encode([
                 'total' => count($results),
                 'columns' => $columns,
                 'data' => $results,
                 'sql' => $sql,
             ], JSON_UNESCAPED_UNICODE);
+
+            return false !== $encoded ? $encoded : '{"error": "JSON encoding failed"}';
         } catch (\Throwable $e) {
-            return json_encode([
+            $encoded = json_encode([
                 'error' => $e->getMessage(),
                 'sql' => $sql,
             ], JSON_UNESCAPED_UNICODE);
+
+            return false !== $encoded ? $encoded : '{"error": "JSON encoding failed"}';
         }
     }
 }

@@ -7,17 +7,21 @@ use Yiisoft\Json\Json;
 class ChoiceVO
 {
     public function __construct(
+        /** @var array<string, mixed> $delta */
         private readonly array $delta,
         private readonly ?string $finishReason = null,
         private readonly ?int $index = null,
     ) {
     }
 
+    /**
+     * @param array<string, mixed> $data
+     */
     public static function fromArray(array $data): self
     {
         // 处理非流式响应（使用 message 字段）和流式响应（使用 delta 字段）
         $delta = $data['delta'] ?? $data['message'] ?? [];
-        
+
         return new self(
             $delta,
             $data['finish_reason'] ?? null,
@@ -50,6 +54,9 @@ class ChoiceVO
         return $this->index;
     }
 
+    /**
+     * @return array<mixed>|null
+     */
     public function getToolCalls(): ?array
     {
         return $this->delta['tool_calls'] ?? null;
@@ -62,11 +69,11 @@ class ChoiceVO
      */
     public function getDecodeToolCalls(): array
     {
-//        dump($this->delta);
+        //        dump($this->delta);
         $result = [];
         foreach ($this->delta['tool_calls'] ?? [] as $item) {
             // ID是必须要有的
-            if (empty($item['id'])) {
+            if (!isset($item['id']) || '' === $item['id']) {
                 continue;
             }
             $result[] = new ToolCall(

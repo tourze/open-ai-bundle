@@ -3,19 +3,24 @@
 namespace OpenAIBundle\Tests\VO;
 
 use OpenAIBundle\VO\ChoiceVO;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
-class ChoiceVOTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(ChoiceVO::class)]
+final class ChoiceVOTest extends TestCase
 {
-    public function test_fromArray_createsChoiceVOFromValidData(): void
+    public function testFromArrayCreatesChoiceVOFromValidData(): void
     {
         $data = [
             'delta' => [
                 'content' => 'Hello world',
-                'role' => 'assistant'
+                'role' => 'assistant',
             ],
             'finish_reason' => 'stop',
-            'index' => 0
+            'index' => 0,
         ];
 
         $choice = ChoiceVO::fromArray($data);
@@ -26,12 +31,12 @@ class ChoiceVOTest extends TestCase
         $this->assertEquals(0, $choice->getIndex());
     }
 
-    public function test_fromArray_handlesEmptyDelta(): void
+    public function testFromArrayHandlesEmptyDelta(): void
     {
         $data = [
             'delta' => [],
             'finish_reason' => null,
-            'index' => 0
+            'index' => 0,
         ];
 
         $choice = ChoiceVO::fromArray($data);
@@ -42,93 +47,93 @@ class ChoiceVOTest extends TestCase
         $this->assertEquals(0, $choice->getIndex());
     }
 
-    public function test_getContent_returnsNullWhenNotSet(): void
+    public function testGetContentReturnsNullWhenNotSet(): void
     {
         $choice = new ChoiceVO([]);
 
         $this->assertNull($choice->getContent());
     }
 
-    public function test_getContent_returnsContentFromDelta(): void
+    public function testGetContentReturnsContentFromDelta(): void
     {
         $choice = new ChoiceVO(['content' => 'Test content']);
 
         $this->assertEquals('Test content', $choice->getContent());
     }
 
-    public function test_getReasoningContent_returnsNullWhenNotSet(): void
+    public function testGetReasoningContentReturnsNullWhenNotSet(): void
     {
         $choice = new ChoiceVO([]);
 
         $this->assertNull($choice->getReasoningContent());
     }
 
-    public function test_getReasoningContent_returnsReasoningFromDelta(): void
+    public function testGetReasoningContentReturnsReasoningFromDelta(): void
     {
         $choice = new ChoiceVO(['reasoning_content' => 'Reasoning process']);
 
         $this->assertEquals('Reasoning process', $choice->getReasoningContent());
     }
 
-    public function test_getRole_returnsNullWhenNotSet(): void
+    public function testGetRoleReturnsNullWhenNotSet(): void
     {
         $choice = new ChoiceVO([]);
 
         $this->assertNull($choice->getRole());
     }
 
-    public function test_getRole_returnsRoleFromDelta(): void
+    public function testGetRoleReturnsRoleFromDelta(): void
     {
         $choice = new ChoiceVO(['role' => 'user']);
 
         $this->assertEquals('user', $choice->getRole());
     }
 
-    public function test_getFinishReason_handlesNullValue(): void
+    public function testGetFinishReasonHandlesNullValue(): void
     {
         $choice = new ChoiceVO([], null);
 
         $this->assertNull($choice->getFinishReason());
     }
 
-    public function test_getFinishReason_returnsFinishReason(): void
+    public function testGetFinishReasonReturnsFinishReason(): void
     {
         $choice = new ChoiceVO([], 'length');
 
         $this->assertEquals('length', $choice->getFinishReason());
     }
 
-    public function test_getIndex_handlesNullValue(): void
+    public function testGetIndexHandlesNullValue(): void
     {
         $choice = new ChoiceVO([], null, null);
 
         $this->assertNull($choice->getIndex());
     }
 
-    public function test_getIndex_returnsIndex(): void
+    public function testGetIndexReturnsIndex(): void
     {
         $choice = new ChoiceVO([], null, 2);
 
         $this->assertEquals(2, $choice->getIndex());
     }
 
-    public function test_getToolCalls_returnsNullWhenNotSet(): void
+    public function testGetToolCallsReturnsNullWhenNotSet(): void
     {
         $choice = new ChoiceVO([]);
 
         $this->assertNull($choice->getToolCalls());
     }
 
-    public function test_getToolCalls_returnsToolCallsFromDelta(): void
+    public function testGetToolCallsReturnsToolCallsFromDelta(): void
     {
         $toolCalls = [
             [
                 'id' => 'call_123',
                 'function' => [
                     'name' => 'test_function',
-                    'arguments' => '{"param": "value"}'
-                ]
-            ]
+                    'arguments' => '{"param": "value"}',
+                ],
+            ],
         ];
 
         $choice = new ChoiceVO(['tool_calls' => $toolCalls]);
@@ -136,14 +141,14 @@ class ChoiceVOTest extends TestCase
         $this->assertEquals($toolCalls, $choice->getToolCalls());
     }
 
-    public function test_getDecodeToolCalls_returnsEmptyArrayWhenNoToolCalls(): void
+    public function testGetDecodeToolCallsReturnsEmptyArrayWhenNoToolCalls(): void
     {
         $choice = new ChoiceVO([]);
 
         $this->assertEquals([], $choice->getDecodeToolCalls());
     }
 
-    public function test_getDecodeToolCalls_decodesToolCallsFromDelta(): void
+    public function testGetDecodeToolCallsDecodesToolCallsFromDelta(): void
     {
         $toolCalls = [
             [
@@ -152,9 +157,9 @@ class ChoiceVOTest extends TestCase
                 'type' => 'function',
                 'function' => [
                     'name' => 'test_function',
-                    'arguments' => '{"param": "value"}'
-                ]
-            ]
+                    'arguments' => '{"param": "value"}',
+                ],
+            ],
         ];
 
         $choice = new ChoiceVO(['tool_calls' => $toolCalls]);
@@ -166,7 +171,7 @@ class ChoiceVOTest extends TestCase
         $this->assertEquals(['param' => 'value'], $decodedCalls[0]->getFunctionArguments());
     }
 
-    public function test_getDecodeToolCalls_handlesInvalidJsonArguments(): void
+    public function testGetDecodeToolCallsHandlesInvalidJsonArguments(): void
     {
         $toolCalls = [
             [
@@ -175,18 +180,18 @@ class ChoiceVOTest extends TestCase
                 'type' => 'function',
                 'function' => [
                     'name' => 'test_function',
-                    'arguments' => 'invalid json'
-                ]
-            ]
+                    'arguments' => 'invalid json',
+                ],
+            ],
         ];
 
         $choice = new ChoiceVO(['tool_calls' => $toolCalls]);
-        
+
         $this->expectException(\JsonException::class);
         $choice->getDecodeToolCalls();
     }
 
-    public function test_fromArray_withMinimalData(): void
+    public function testFromArrayWithMinimalData(): void
     {
         $data = ['delta' => []];
 
@@ -198,7 +203,7 @@ class ChoiceVOTest extends TestCase
         $this->assertNull($choice->getIndex());
     }
 
-    public function test_fromArray_withCompleteData(): void
+    public function testFromArrayWithCompleteData(): void
     {
         $data = [
             'delta' => [
@@ -212,13 +217,13 @@ class ChoiceVOTest extends TestCase
                         'type' => 'function',
                         'function' => [
                             'name' => 'calculate',
-                            'arguments' => '{"x": 5, "y": 3}'
-                        ]
-                    ]
-                ]
+                            'arguments' => '{"x": 5, "y": 3}',
+                        ],
+                    ],
+                ],
             ],
             'finish_reason' => 'tool_calls',
-            'index' => 1
+            'index' => 1,
         ];
 
         $choice = ChoiceVO::fromArray($data);
@@ -231,4 +236,4 @@ class ChoiceVOTest extends TestCase
         $this->assertNotNull($choice->getToolCalls());
         $this->assertCount(1, $choice->getDecodeToolCalls());
     }
-} 
+}

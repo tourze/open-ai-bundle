@@ -24,8 +24,11 @@ use OpenAIBundle\Entity\Message;
 use OpenAIBundle\Enum\RoleEnum;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
 
+/**
+ * @extends AbstractCrudController<Message>
+ */
 #[AdminCrud(routePath: '/open-ai/message', routeName: 'open_ai_message')]
-class MessageCrudController extends AbstractCrudController
+final class MessageCrudController extends AbstractCrudController
 {
     public static function getEntityFqcn(): string
     {
@@ -43,23 +46,27 @@ class MessageCrudController extends AbstractCrudController
             ->setPageTitle('detail', 'AI消息详情')
             ->setHelp('index', '管理AI对话中的消息记录，包括用户消息和AI回复')
             ->setDefaultSort(['id' => 'DESC'])
-            ->setSearchFields(['content', 'msgId', 'model']);
+            ->setSearchFields(['content', 'msgId', 'model'])
+        ;
     }
 
     public function configureFields(string $pageName): iterable
     {
         yield IdField::new('id', 'ID')
             ->setMaxLength(9999)
-            ->hideOnForm();
+            ->hideOnForm()
+        ;
 
         yield TextField::new('msgId', '消息ID')
             ->setMaxLength(120)
             ->setRequired(true)
-            ->setHelp('唯一的消息标识符');
+            ->setHelp('唯一的消息标识符')
+        ;
 
         yield AssociationField::new('conversation', '所属对话')
             ->setRequired(true)
-            ->setHelp('该消息所属的对话会话');
+            ->setHelp('该消息所属的对话会话')
+        ;
 
         yield ChoiceField::new('role', '角色')
             ->setFormType(EnumType::class)
@@ -68,65 +75,87 @@ class MessageCrudController extends AbstractCrudController
                 return $value instanceof RoleEnum ? $value->value : '';
             })
             ->setRequired(true)
-            ->setHelp('消息的发送者角色');
+            ->setHelp('消息的发送者角色')
+        ;
 
         yield TextareaField::new('content', '消息内容')
             ->setNumOfRows(6)
             ->setRequired(true)
-            ->setHelp('消息的文本内容');
+            ->setHelp('消息的文本内容')
+        ;
 
         yield TextareaField::new('reasoningContent', '推理过程')
             ->setNumOfRows(4)
-            ->setHelp('AI的思考推理过程');
+            ->setHelp('AI的思考推理过程')
+        ;
 
         yield TextareaField::new('toolCalls', '工具调用')
             ->setNumOfRows(3)
             ->formatValue(function ($value) {
-                return $value ? json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) : '';
+                if (null === $value || [] === $value) {
+                    return '';
+                }
+                if (is_array($value)) {
+                    return json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+                }
+
+                return '';
             })
-            ->setHelp('调用的工具函数信息');
+            ->setHelp('调用的工具函数信息')
+            ->onlyOnDetail()
+        ;
 
         yield TextField::new('toolCallId', '工具调用ID')
             ->setMaxLength(50)
-            ->setHelp('工具调用的唯一标识符');
+            ->setHelp('工具调用的唯一标识符')
+        ;
 
         yield TextField::new('model', '使用模型')
             ->setMaxLength(50)
             ->setRequired(true)
-            ->setHelp('生成该消息使用的AI模型');
+            ->setHelp('生成该消息使用的AI模型')
+        ;
 
         yield IntegerField::new('promptTokens', '输入令牌数')
-            ->setHelp('提示词消耗的令牌数量');
+            ->setHelp('提示词消耗的令牌数量')
+        ;
 
         yield IntegerField::new('completionTokens', '输出令牌数')
-            ->setHelp('生成内容消耗的令牌数量');
+            ->setHelp('生成内容消耗的令牌数量')
+        ;
 
         yield IntegerField::new('totalTokens', '总令牌数')
-            ->setHelp('该消息消耗的总令牌数量');
+            ->setHelp('该消息消耗的总令牌数量')
+        ;
 
         yield AssociationField::new('apiKey', '使用密钥')
-            ->setHelp('生成该消息使用的API密钥');
+            ->setHelp('生成该消息使用的API密钥')
+        ;
 
         yield TextField::new('createdBy', '创建人')
-            ->hideOnForm();
+            ->hideOnForm()
+        ;
 
         yield TextField::new('updatedBy', '更新人')
-            ->hideOnForm();
+            ->hideOnForm()
+        ;
 
         yield DateTimeField::new('createTime', '创建时间')
             ->hideOnForm()
-            ->setFormat('yyyy-MM-dd HH:mm:ss');
+            ->setFormat('yyyy-MM-dd HH:mm:ss')
+        ;
 
         yield DateTimeField::new('updateTime', '更新时间')
             ->hideOnForm()
-            ->setFormat('yyyy-MM-dd HH:mm:ss');
+            ->setFormat('yyyy-MM-dd HH:mm:ss')
+        ;
     }
 
     public function configureActions(Actions $actions): Actions
     {
         return $actions
             ->add(Crud::PAGE_INDEX, Action::DETAIL)
-            ->reorder(Crud::PAGE_INDEX, [Action::DETAIL, Action::EDIT, Action::DELETE]);
+        ;
     }
 
     public function configureFilters(Filters $filters): Filters
@@ -145,6 +174,7 @@ class MessageCrudController extends AbstractCrudController
             ->add(NumericFilter::new('totalTokens', '总令牌数'))
             ->add(TextFilter::new('createdBy', '创建人'))
             ->add(DateTimeFilter::new('createTime', '创建时间'))
-            ->add(DateTimeFilter::new('updateTime', '更新时间'));
+            ->add(DateTimeFilter::new('updateTime', '更新时间'))
+        ;
     }
-} 
+}

@@ -2,6 +2,7 @@
 
 namespace OpenAIBundle\Controller;
 
+use OpenAIBundle\Entity\Conversation;
 use OpenAIBundle\Repository\ConversationRepository;
 use OpenAIBundle\Repository\MessageRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -9,7 +10,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
-class ConversationMessagesController extends AbstractController
+final class ConversationMessagesController extends AbstractController
 {
     public function __construct(
         private readonly ConversationRepository $conversationRepository,
@@ -24,6 +25,7 @@ class ConversationMessagesController extends AbstractController
         if (null === $conversation) {
             return $this->json(['error' => 'Conversation not found'], 404);
         }
+        assert($conversation instanceof Conversation);
 
         $messages = $this->messageRepository->findByConversation($conversation);
 
@@ -36,8 +38,9 @@ class ConversationMessagesController extends AbstractController
                 'createdAt' => $message->getCreateTime()?->format('Y-m-d H:i:s'),
             ];
 
-            if ($message->getToolCalls()) {
-                $data['toolCalls'] = $message->getToolCalls();
+            $toolCalls = $message->getToolCalls();
+            if (null !== $toolCalls && [] !== $toolCalls) {
+                $data['toolCalls'] = $toolCalls;
             }
 
             $messagesData[] = $data;
