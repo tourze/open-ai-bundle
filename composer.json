@@ -42,7 +42,7 @@
     "tourze/doctrine-user-bundle": "1.0.*",
     "tourze/easy-admin-menu-bundle": "1.0.*",
     "tourze/enum-extra": "1.*",
-    "tourze/mcp-contracts": "0.0.*",
+    "tourze/mcp-contracts": "1.0.*",
     "tourze/symfony-routing-auto-loader-bundle": "1.0.*",
     "yiisoft/json": "^1.0"
   },
