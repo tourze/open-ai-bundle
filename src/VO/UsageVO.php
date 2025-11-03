@@ -23,9 +23,9 @@ class UsageVO
         }
 
         return new self(
-            $data['prompt_tokens'],
-            $data['completion_tokens'],
-            $data['total_tokens']
+            (int) $data['prompt_tokens'],
+            (int) $data['completion_tokens'],
+            (int) $data['total_tokens']
         );
     }
 

@@ -40,7 +40,11 @@ class FetchSqlResult implements ToolInterface
      */
     public function execute(array $parameters = []): string
     {
-        $sql = trim($parameters['sql'] ?? '');
+        $sql = $parameters['sql'] ?? '';
+        if (!is_string($sql)) {
+            throw SqlQueryException::emptySql();
+        }
+        $sql = trim($sql);
         if ('' === $sql) {
             throw SqlQueryException::emptySql();
         }

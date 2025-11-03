@@ -72,16 +72,28 @@ class ChoiceVO
         //        dump($this->delta);
         $result = [];
         foreach ($this->delta['tool_calls'] ?? [] as $item) {
-            // ID是必须要有的
+            // 确保类型安全
             if (!isset($item['id']) || '' === $item['id']) {
                 continue;
             }
+
+            // 确保必需的字段存在且类型正确
+            assert(isset($item['index']));
+            assert(is_int($item['index']) || is_string($item['index']));
+            assert(isset($item['type']));
+            assert(is_string($item['type']));
+            assert(isset($item['function']['name']));
+            assert(is_string($item['function']['name']));
+
+            $arguments = Json::decode($item['function']['arguments'] ?? '{}');
+            assert(is_array($arguments));
+
             $result[] = new ToolCall(
-                $item['id'],
+                (string) $item['id'],
                 $item['index'],
                 $item['type'],
                 $item['function']['name'],
-                Json::decode($item['function']['arguments']) ?? [],
+                $arguments,
             );
         }
 

@@ -29,6 +29,10 @@ class ListFiles implements ToolInterface
         $directory = $parameters['directory'] ?? '.';
         $pattern = $parameters['pattern'] ?? '*';
 
+        if (!is_string($directory) || !is_string($pattern)) {
+            return $this->encodeError('参数类型错误');
+        }
+
         if (!is_dir($directory)) {
             return $this->encodeError('目录不存在');
         }

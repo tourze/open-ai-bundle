@@ -25,7 +25,7 @@ readonly class FunctionService
 
     /**
      * 生成OpenAI需要的tools格式
-     * @return array<mixed>
+     * @return array<int, array{type: string, function?: array<string, mixed>}>
      */
     public function generateToolsArray(Character $character): array
     {
@@ -90,7 +90,8 @@ readonly class FunctionService
                 $parameters['required'][] = $parameter->getName();
             }
             $parameters['properties'][$parameter->getName()] = [
-                'type' => $parameter->getType(),
+                // OpenAI/火山引擎函数参数的类型需要是字符串，这里使用枚举底层值
+                'type' => $parameter->getType()->value,
                 'description' => $parameter->getDescription(),
             ];
         }

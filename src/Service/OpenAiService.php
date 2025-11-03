@@ -11,6 +11,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpClient\NativeHttpClient;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
+use Symfony\Contracts\HttpClient\ChunkInterface;
 use Yiisoft\Json\Json;
 
 #[WithMonologChannel(channel: 'open_ai')]
@@ -65,10 +66,13 @@ class OpenAiService
             $this->logger->info('OpenAI API 请求成功', [
                 'duration' => $duration,
                 'status_code' => $response->getStatusCode(),
-                'usage' => $responseData['usage'] ?? null,
+                'usage' => is_array($responseData) && isset($responseData['usage']) ? $responseData['usage'] : null,
             ]);
 
-            return StreamChunkVO::fromArray($responseData);
+            assert(is_array($responseData), 'Response data must be an array');
+            /** @var array<string, mixed> $typedData */
+            $typedData = $responseData;
+            return StreamChunkVO::fromArray($typedData);
         } catch (\Throwable $e) {
             $duration = microtime(true) - $startTime;
             $this->logger->error('OpenAI API 请求失败', [
@@ -100,7 +104,10 @@ class OpenAiService
 
         $response = $this->executeStreamRequest($url, $requestOptions, $requestBody, $messages);
 
-        yield from $this->processStreamResponse($response, $apiKey);
+        foreach ($this->processStreamResponse($response, $apiKey) as $chunk) {
+            assert($chunk instanceof StreamChunkVO, 'Chunk must be a StreamChunkVO instance');
+            yield $chunk;
+        }
     }
 
     /**
@@ -174,8 +181,10 @@ class OpenAiService
      */
     private function processChunk($chunk, string $buffer, ApiKey $apiKey): array
     {
+        assert($chunk instanceof ChunkInterface, 'Chunk must be a ChunkInterface instance');
+
         $content = $chunk->getContent();
-        if (null === $content || '' === $content) {
+        if ('' === $content) {
             return ['result' => null, 'buffer' => $buffer];
         }
 
@@ -222,7 +231,10 @@ class OpenAiService
 
             $decoded = Json::decode($data);
 
-            return StreamChunkVO::fromArray($decoded);
+            assert(is_array($decoded), 'Decoded data must be an array');
+            /** @var array<string, mixed> $typedDecoded */
+            $typedDecoded = $decoded;
+            return StreamChunkVO::fromArray($typedDecoded);
         } catch (\Throwable $e) {
             $this->logger->error('流返回遇到异常', [
                 'exception' => $e,

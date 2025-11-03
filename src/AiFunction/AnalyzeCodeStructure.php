@@ -30,33 +30,18 @@ class AnalyzeCodeStructure implements ToolInterface
      */
     public function execute(array $parameters = []): string
     {
-        $filepath = $parameters['filepath'] ?? '';
-        $detail_level = $parameters['detail_level'] ?? 'basic';
+        $filepath = $this->getFilePath($parameters);
+        $detail_level = $this->getDetailLevel($parameters);
 
-        if (!file_exists($filepath)) {
-            $result = json_encode(['error' => '文件不存在']);
-
-            return false !== $result ? $result : '{"error": "JSON encoding failed"}';
+        if (!$this->validateFile($filepath)) {
+            return $this->encodeError('文件不存在');
         }
 
         try {
-            $className = $this->getClassNameFromFile($filepath);
-            /** @var class-string $className */
-            $reflection = new \ReflectionClass($className);
-            $result = $this->buildBasicResult($reflection);
-
-            if ('full' === $detail_level) {
-                $result['methods'] = $this->analyzeMethods($reflection);
-                $result['properties'] = $this->analyzeProperties($reflection);
-            }
-
-            $encoded = json_encode($result, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-
-            return false !== $encoded ? $encoded : '{"error": "JSON encoding failed"}';
+            $analysis = $this->analyzeFile($filepath, $detail_level);
+            return $this->encodeResult($analysis);
         } catch (\Throwable $e) {
-            $result = json_encode(['error' => $e->getMessage()]);
-
-            return false !== $result ? $result : '{"error": "JSON encoding failed"}';
+            return $this->encodeError($e->getMessage());
         }
     }
 
@@ -163,6 +148,9 @@ class AnalyzeCodeStructure implements ToolInterface
         ];
     }
 
+    /**
+     * @return class-string
+     */
     private function getClassNameFromFile(string $filepath): string
     {
         $content = file_get_contents($filepath);
@@ -170,7 +158,9 @@ class AnalyzeCodeStructure implements ToolInterface
             throw CodeAnalysisException::classNotFound($filepath);
         }
         if (1 === preg_match('/namespace\s+([^;]+);.*class\s+([^\s{]+)/s', $content, $matches)) {
-            return $matches[1] . '\\' . $matches[2];
+            /** @var class-string $className */
+            $className = $matches[1] . '\\' . $matches[2];
+            return $className;
         }
         throw CodeAnalysisException::classNotFound($filepath);
     }
@@ -191,5 +181,61 @@ class AnalyzeCodeStructure implements ToolInterface
         }
 
         return 'unknown';
+    }
+
+    /**
+     * @param array<string, mixed> $parameters
+     */
+    private function getFilePath(array $parameters): string
+    {
+        $filepath = $parameters['filepath'] ?? '';
+        return is_string($filepath) ? $filepath : '';
+    }
+
+    /**
+     * @param array<string, mixed> $parameters
+     */
+    private function getDetailLevel(array $parameters): string
+    {
+        $detail_level = $parameters['detail_level'] ?? 'basic';
+        return is_string($detail_level) ? $detail_level : 'basic';
+    }
+
+    private function validateFile(string $filepath): bool
+    {
+        return '' !== $filepath && file_exists($filepath);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function analyzeFile(string $filepath, string $detail_level): array
+    {
+        $className = $this->getClassNameFromFile($filepath);
+        /** @var class-string $className */
+        $reflection = new \ReflectionClass($className);
+        $result = $this->buildBasicResult($reflection);
+
+        if ('full' === $detail_level) {
+            $result['methods'] = $this->analyzeMethods($reflection);
+            $result['properties'] = $this->analyzeProperties($reflection);
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param array<string, mixed> $result
+     */
+    private function encodeResult(array $result): string
+    {
+        $encoded = json_encode($result, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        return false !== $encoded ? $encoded : '{"error": "JSON encoding failed"}';
+    }
+
+    private function encodeError(string $message): string
+    {
+        $result = json_encode(['error' => $message]);
+        return false !== $result ? $result : '{"error": "JSON encoding failed"}';
     }
 }

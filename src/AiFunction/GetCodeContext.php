@@ -31,6 +31,16 @@ class GetCodeContext implements ToolInterface
         $line_number = $parameters['line_number'] ?? 1;
         $context_lines = $parameters['context_lines'] ?? 5;
 
+        if (!is_string($filepath)) {
+            return $this->encodeError('文件路径必须是字符串');
+        }
+        if (!is_int($line_number)) {
+            $line_number = is_numeric($line_number) ? (int) $line_number : 1;
+        }
+        if (!is_int($context_lines)) {
+            $context_lines = is_numeric($context_lines) ? (int) $context_lines : 5;
+        }
+
         if (!file_exists($filepath)) {
             return $this->encodeError('文件不存在');
         }

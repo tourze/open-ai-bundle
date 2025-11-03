@@ -23,7 +23,7 @@ class ChatResponseHandler
     }
 
     /**
-     * @param array<mixed> $tools
+     * @param array<int, array{type: string, function?: array<string, mixed>}> $tools
      */
     public function fetchResponse(
         OutputInterface $output,
@@ -45,7 +45,7 @@ class ChatResponseHandler
     }
 
     /**
-     * @param array<mixed> $tools
+     * @param array<int, array{type: string, function?: array<string, mixed>}> $tools
      */
     private function buildRequestOptions(Character $character, ApiKey $apiKey, array $tools, bool $debug): StreamRequestOptions
     {
@@ -57,12 +57,27 @@ class ChatResponseHandler
             maxTokens: $character->getMaxTokens(),
             presencePenalty: $character->getPresencePenalty(),
             frequencyPenalty: $character->getFrequencyPenalty(),
-            tools: [] !== $tools ? $tools : null,
+            tools: [] !== $tools ? $this->normalizeTools($tools) : null,
         );
     }
 
     /**
      * @param array<mixed> $tools
+     * @return array<int, array{type: string, function?: array<string, mixed>}>
+     */
+    private function normalizeTools(array $tools): array
+    {
+        $normalized = [];
+        foreach ($tools as $tool) {
+            if (is_array($tool) && isset($tool['type']) && is_string($tool['type'])) {
+                $normalized[] = $tool;
+            }
+        }
+        return $normalized;
+    }
+
+    /**
+     * @param array<int, array{type: string, function?: array<string, mixed>}> $tools
      */
     private function handleNonStreamResponse(
         OutputInterface $output,
@@ -83,7 +98,7 @@ class ChatResponseHandler
     }
 
     /**
-     * @param array<mixed> $tools
+     * @param array<int, array{type: string, function?: array<string, mixed>}> $tools
      */
     private function handleStreamResponse(
         OutputInterface $output,
@@ -115,7 +130,7 @@ class ChatResponseHandler
     }
 
     /**
-     * @param array<mixed> $tools
+     * @param array<int, array{type: string, function?: array<string, mixed>}> $tools
      * @param mixed $chunk
      */
     private function processStreamChunk(
@@ -125,6 +140,8 @@ class ChatResponseHandler
         $chunk,
         array $tools,
     ): bool {
+        assert($chunk instanceof StreamChunkVO, 'Chunk must be a StreamChunkVO instance');
+
         $shouldRefetch = false;
 
         foreach ($chunk->getChoices() as $choice) {
@@ -152,15 +169,19 @@ class ChatResponseHandler
         $chunk,
         $choice,
     ): void {
-        if (null !== $choice->getContent()) {
+        assert($chunk instanceof StreamChunkVO, 'Chunk must be a StreamChunkVO instance');
+        assert($choice instanceof \OpenAIBundle\VO\ChoiceVO, 'Choice must be a ChoiceVO instance');
+
+        $content = $choice->getContent();
+        if (null !== $content) {
             $this->conversationService->appendAssistantContent(
                 $conversation,
                 $apiKey,
                 $chunk->getMsgId(),
-                strval($choice->getContent()),
+                strval($content),
             );
-            if (strlen($choice->getContent()) > 0) {
-                $output->write($choice->getContent());
+            if (strlen($content) > 0) {
+                $output->write($content);
             }
         }
     }
@@ -176,10 +197,14 @@ class ChatResponseHandler
         $chunk,
         $choice,
     ): void {
-        if (null !== $choice->getReasoningContent()) {
+        assert($chunk instanceof StreamChunkVO, 'Chunk must be a StreamChunkVO instance');
+        assert($choice instanceof \OpenAIBundle\VO\ChoiceVO, 'Choice must be a ChoiceVO instance');
+
+        $reasoningContent = $choice->getReasoningContent();
+        if (null !== $reasoningContent) {
             $this->conversationService->appendAssistantReasoningContent($conversation, $apiKey, $chunk, $choice);
-            if (strlen($choice->getReasoningContent()) > 0) {
-                $output->write("<comment>{$choice->getReasoningContent()}</comment>");
+            if (strlen($reasoningContent) > 0) {
+                $output->write("<comment>{$reasoningContent}</comment>");
             }
         }
     }
@@ -194,7 +219,11 @@ class ChatResponseHandler
         $choice,
         $chunk,
     ): bool {
-        if (null !== $choice->getToolCalls() && [] !== $choice->getToolCalls()) {
+        assert($chunk instanceof StreamChunkVO, 'Chunk must be a StreamChunkVO instance');
+        assert($choice instanceof \OpenAIBundle\VO\ChoiceVO, 'Choice must be a ChoiceVO instance');
+
+        $toolCalls = $choice->getToolCalls();
+        if (null !== $toolCalls && [] !== $toolCalls) {
             $this->conversationService->appendAssistantToolCalls($conversation, $apiKey, $chunk, $choice);
 
             foreach ($choice->getDecodeToolCalls() as $toolCall) {
@@ -220,6 +249,8 @@ class ChatResponseHandler
         ApiKey $apiKey,
         $chunk,
     ): void {
+        assert($chunk instanceof StreamChunkVO, 'Chunk must be a StreamChunkVO instance');
+
         $usage = $chunk->getUsage();
         if (null !== $usage) {
             $this->conversationService->appendAssistantUsage($conversation, $apiKey, $chunk, $usage);
@@ -246,7 +277,7 @@ class ChatResponseHandler
     }
 
     /**
-     * @param array<mixed> $tools
+     * @param array<int, array{type: string, function?: array<string, mixed>}> $tools
      * @param mixed $choice
      */
     private function processNonStreamChoice(
@@ -259,6 +290,8 @@ class ChatResponseHandler
         bool $debug,
         bool $isQuiet,
     ): void {
+        assert($choice instanceof \OpenAIBundle\VO\ChoiceVO, 'Choice must be a ChoiceVO instance');
+
         $this->processNonStreamContent($output, $conversation, $apiKey, $response, $choice);
         $this->processNonStreamReasoning($output, $conversation, $apiKey, $response, $choice);
         $this->processNonStreamToolCalls($output, $conversation, $apiKey, $response, $choice, $tools, $debug, $isQuiet);
@@ -274,7 +307,10 @@ class ChatResponseHandler
         StreamResponseVO $response,
         $choice,
     ): void {
-        if (null === $choice->getContent()) {
+        assert($choice instanceof \OpenAIBundle\VO\ChoiceVO, 'Choice must be a ChoiceVO instance');
+
+        $content = $choice->getContent();
+        if (null === $content) {
             return;
         }
 
@@ -282,11 +318,11 @@ class ChatResponseHandler
             $conversation,
             $apiKey,
             $response->getMsgId(),
-            strval($choice->getContent()),
+            strval($content),
         );
 
-        if (strlen($choice->getContent()) > 0) {
-            $output->write($choice->getContent());
+        if (strlen($content) > 0) {
+            $output->write($content);
         }
     }
 
@@ -300,20 +336,23 @@ class ChatResponseHandler
         StreamResponseVO $response,
         $choice,
     ): void {
-        if (null === $choice->getReasoningContent()) {
+        assert($choice instanceof \OpenAIBundle\VO\ChoiceVO, 'Choice must be a ChoiceVO instance');
+
+        $reasoningContent = $choice->getReasoningContent();
+        if (null === $reasoningContent) {
             return;
         }
 
         $tempChunk = $this->createTempChunk($response, [$choice]);
         $this->conversationService->appendAssistantReasoningContent($conversation, $apiKey, $tempChunk, $choice);
 
-        if (strlen($choice->getReasoningContent()) > 0) {
-            $output->write("<comment>{$choice->getReasoningContent()}</comment>");
+        if (strlen($reasoningContent) > 0) {
+            $output->write("<comment>{$reasoningContent}</comment>");
         }
     }
 
     /**
-     * @param array<mixed> $tools
+     * @param array<int, array{type: string, function?: array<string, mixed>}> $tools
      * @param mixed $choice
      */
     private function processNonStreamToolCalls(
@@ -326,7 +365,10 @@ class ChatResponseHandler
         bool $debug,
         bool $isQuiet,
     ): void {
-        if (null === $choice->getToolCalls() || [] === $choice->getToolCalls()) {
+        assert($choice instanceof \OpenAIBundle\VO\ChoiceVO, 'Choice must be a ChoiceVO instance');
+
+        $toolCalls = $choice->getToolCalls();
+        if (null === $toolCalls || [] === $toolCalls) {
             return;
         }
 
@@ -373,8 +415,23 @@ class ChatResponseHandler
             $response->model,
             $response->systemFingerprint,
             $response->object,
-            $choices,
+            $this->normalizeChoices($choices),
             $response->usage
         );
+    }
+
+    /**
+     * @param array<mixed> $choices
+     * @return array<int, \OpenAIBundle\VO\ChoiceVO>
+     */
+    private function normalizeChoices(array $choices): array
+    {
+        $normalized = [];
+        foreach ($choices as $choice) {
+            if ($choice instanceof \OpenAIBundle\VO\ChoiceVO) {
+                $normalized[] = $choice;
+            }
+        }
+        return $normalized;
     }
 }

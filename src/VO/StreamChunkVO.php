@@ -25,12 +25,20 @@ class StreamChunkVO extends StreamResponseVO
      */
     public static function fromArray(array $data): self
     {
+        // 确保必需字段存在且为正确的类型
+        assert(isset($data['id']));
+        assert(isset($data['created']));
+        assert(isset($data['model']));
+        assert(isset($data['object']));
+        assert(isset($data['choices']));
+        assert(is_array($data['choices']));
+
         $result = new self(
-            $data['id'],
-            $data['created'],
-            $data['model'],
-            $data['system_fingerprint'] ?? '',
-            $data['object'],
+            (string) $data['id'],
+            (int) $data['created'],
+            (string) $data['model'],
+            (string) ($data['system_fingerprint'] ?? ''),
+            (string) $data['object'],
             array_map(
                 fn (array $choice) => ChoiceVO::fromArray($choice),
                 $data['choices']

@@ -67,12 +67,6 @@ final class CharacterCrudControllerTest extends AbstractEasyAdminControllerTestC
         return self::provideNewPageFields();
     }
 
-    protected function onSetUp(): void
-    {
-        // 不在setUp中创建客户端，避免客户端状态混乱
-        // 创建上传目录在测试方法中进行
-    }
-
     public function testGetCharacterIndexPageReturnsSuccessful(): void
     {
         $client = self::createClientWithDatabase();

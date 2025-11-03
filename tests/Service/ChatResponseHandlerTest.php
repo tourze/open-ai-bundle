@@ -315,6 +315,9 @@ final class ChatResponseHandlerTest extends AbstractIntegrationTestCase
 
         $result = $method->invoke($this->handler, $character, $apiKey, $tools, false);
 
+        // @var StreamRequestOptions $result
+        $this->assertInstanceOf(\OpenAIBundle\VO\StreamRequestOptions::class, $result);
+
         $reflection = new \ReflectionClass($result);
         $toolsProp = $reflection->getProperty('tools');
         $toolsProp->setAccessible(true);

@@ -27,38 +27,16 @@ class FindReferences implements ToolInterface
 
     public function execute(array $parameters = []): string
     {
-        $symbol = $parameters['symbol'] ?? '';
-        $search_path = $parameters['search_path'] ?? '';
-        $symbol_type = $parameters['symbol_type'] ?? 'all';
+        [$symbol, $searchPath, $symbolType] = $this->extractParameters($parameters);
 
-        if (!is_dir($search_path)) {
-            $result = json_encode(['error' => '搜索路径不存在']);
-
-            return false !== $result ? $result : '';
+        $validationResult = $this->validateParameters($symbol, $searchPath, $symbolType);
+        if (null !== $validationResult) {
+            return $validationResult;
         }
 
-        $references = [];
-        $files = $this->findPhpFiles($search_path);
+        $references = $this->searchReferences($searchPath, $symbol, $symbolType);
 
-        foreach ($files as $file) {
-            $content = file_get_contents($file);
-            if (false === $content) {
-                continue;
-            }
-            $matches = $this->findSymbolReferences($content, $symbol, $symbol_type);
-
-            if ([] !== $matches) {
-                $references[$file] = $matches;
-            }
-        }
-
-        $result = json_encode([
-            'symbol' => $symbol,
-            'type' => $symbol_type,
-            'references' => $references,
-        ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-
-        return false !== $result ? $result : '';
+        return $this->encodeResults($symbol, $symbolType, $references);
     }
 
     /**
@@ -72,7 +50,7 @@ class FindReferences implements ToolInterface
 
         $files = [];
         foreach ($iterator as $file) {
-            if ($file->isFile() && 'php' === $file->getExtension()) {
+            if ($file instanceof \SplFileInfo && $file->isFile() && 'php' === $file->getExtension()) {
                 $files[] = $file->getPathname();
             }
         }
@@ -114,5 +92,78 @@ class FindReferences implements ToolInterface
             default:
                 return true;
         }
+    }
+
+    /**
+     * @param array<string, mixed> $parameters
+     * @return array{string, string, string}
+     */
+    private function extractParameters(array $parameters): array
+    {
+        $symbol = $parameters['symbol'] ?? '';
+        $searchPath = $parameters['search_path'] ?? '';
+        $symbolType = $parameters['symbol_type'] ?? 'all';
+
+        return [
+            is_string($symbol) ? $symbol : '',
+            is_string($searchPath) ? $searchPath : '',
+            is_string($symbolType) ? $symbolType : 'all',
+        ];
+    }
+
+    private function validateParameters(string $symbol, string $searchPath, string $symbolType): ?string
+    {
+        if ('' === $symbol || '' === $searchPath) {
+            return $this->encodeError('参数类型错误');
+        }
+
+        if (!is_dir($searchPath)) {
+            return $this->encodeError('搜索路径不存在');
+        }
+
+        return null;
+    }
+
+    /**
+     * @return array<string, array<int, array<string, int|string>>>
+     */
+    private function searchReferences(string $searchPath, string $symbol, string $symbolType): array
+    {
+        $references = [];
+        $files = $this->findPhpFiles($searchPath);
+
+        foreach ($files as $file) {
+            $content = file_get_contents($file);
+            if (false === $content) {
+                continue;
+            }
+
+            $matches = $this->findSymbolReferences($content, $symbol, $symbolType);
+            if ([] !== $matches) {
+                $references[$file] = $matches;
+            }
+        }
+
+        return $references;
+    }
+
+    /**
+     * @param array<string, array<int, array<string, int|string>>> $references
+     */
+    private function encodeResults(string $symbol, string $symbolType, array $references): string
+    {
+        $result = json_encode([
+            'symbol' => $symbol,
+            'type' => $symbolType,
+            'references' => $references,
+        ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+
+        return false !== $result ? $result : '';
+    }
+
+    private function encodeError(string $message): string
+    {
+        $result = json_encode(['error' => $message]);
+        return false !== $result ? $result : '{"error": "Encoding failed"}';
     }
 }

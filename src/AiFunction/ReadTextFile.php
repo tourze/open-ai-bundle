@@ -29,6 +29,13 @@ class ReadTextFile implements ToolInterface
         $filepath = $parameters['filepath'] ?? '';
         $encoding = $parameters['encoding'] ?? 'UTF-8';
 
+        if (!is_string($filepath)) {
+            return $this->encodeError('文件路径必须是字符串');
+        }
+        if (!is_string($encoding)) {
+            $encoding = 'UTF-8';
+        }
+
         $errorMessage = $this->validateFile($filepath);
         if (null !== $errorMessage) {
             return $this->encodeError($errorMessage);

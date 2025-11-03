@@ -151,6 +151,7 @@ final class ModelExceptionTest extends AbstractExceptionTestCase
         $this->assertJson($exception->getMessage());
 
         $decoded = json_decode($exception->getMessage(), true);
+        $this->assertIsArray($decoded);
         $this->assertEquals('model_not_found', $decoded['error']);
         $this->assertEquals('gpt-5', $decoded['model']);
     }

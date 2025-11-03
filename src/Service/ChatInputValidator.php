@@ -32,11 +32,13 @@ class ChatInputValidator
 
         $character = $this->characterRepository->find($characterId);
         if (!$character instanceof Character) {
-            throw ConfigurationException::characterNotFound($characterId);
+            $id = is_scalar($characterId) ? (string) $characterId : 'unknown';
+            throw ConfigurationException::characterNotFound($id);
         }
 
         if (false === $character->isValid()) {
-            throw ConfigurationException::characterNotActive($characterId);
+            $id = is_scalar($characterId) ? (string) $characterId : 'unknown';
+            throw ConfigurationException::characterNotActive($id);
         }
 
         return $character;
@@ -44,11 +46,12 @@ class ChatInputValidator
 
     public function resolveApiKey(InputInterface $input, OutputInterface $output, Character $character): ?ApiKey
     {
-        $apiKeyId = (string) $input->getOption('api-key');
+        /** @var string|int|null $apiKeyId */
+        $apiKeyId = $input->getOption('api-key');
         $apiKey = $character->getPreferredApiKey();
 
         if (null === $apiKey) {
-            if ('' === $apiKeyId) {
+            if (null === $apiKeyId || '' === (string) $apiKeyId) {
                 $output->writeln('<error>请使用 -k 或 --api-key 选项指定 API密钥 ID</error>');
 
                 return null;
@@ -57,7 +60,7 @@ class ChatInputValidator
         }
 
         if (!$apiKey instanceof ApiKey) {
-            throw ConfigurationException::configurationNotFound($apiKeyId);
+            throw ConfigurationException::configurationNotFound((string) $apiKeyId);
         }
 
         return $apiKey;

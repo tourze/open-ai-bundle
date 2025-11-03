@@ -239,7 +239,10 @@ final class ApiKeyRepositoryTest extends AbstractRepositoryTestCase
         ;
 
         $this->assertCount(1, $result);
-        $this->assertSame('No Function Key', $result[0]->getTitle());
+        $this->assertIsArray($result);
+        /** @var ApiKey $apiKey */
+        $apiKey = $result[0];
+        $this->assertSame('No Function Key', $apiKey->getTitle());
     }
 
     // PHPStan 规则要求的可空字段测试方法

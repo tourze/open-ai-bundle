@@ -6,7 +6,7 @@ class ToolCall
 {
     public function __construct(
         private readonly string $id,
-        private readonly string $index,
+        private readonly int|string $index,
         private readonly string $type,
         private readonly string $functionName,
         /** @var array<string, mixed> $functionArguments */
@@ -32,7 +32,7 @@ class ToolCall
         return $this->functionArguments;
     }
 
-    public function getIndex(): string
+    public function getIndex(): int|string
     {
         return $this->index;
     }

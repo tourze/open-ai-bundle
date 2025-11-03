@@ -109,8 +109,17 @@ final class ToolCallTest extends TestCase
         );
 
         $this->assertEquals($complexArgs, $toolCall->getFunctionArguments());
-        $this->assertEquals(30, $toolCall->getFunctionArguments()['config']['timeout']);
-        $this->assertEquals([1, 2, 3], $toolCall->getFunctionArguments()['data']['items']);
+
+        $args = $toolCall->getFunctionArguments();
+        $this->assertArrayHasKey('config', $args);
+        $this->assertIsArray($args['config']);
+        $this->assertArrayHasKey('timeout', $args['config']);
+        $this->assertEquals(30, $args['config']['timeout']);
+
+        $this->assertArrayHasKey('data', $args);
+        $this->assertIsArray($args['data']);
+        $this->assertArrayHasKey('items', $args['data']);
+        $this->assertEquals([1, 2, 3], $args['data']['items']);
     }
 
     public function testToolCallWithStringArguments(): void

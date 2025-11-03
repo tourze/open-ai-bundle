@@ -42,9 +42,10 @@ class ChatInteractiveHandler
         while (true) {
             $output->writeln('');
             $question = new Question('请输入您的问题 (输入 q 退出, c 清除历史): ');
+            /** @var string|null $prompt */
             $prompt = $helper->ask($input, $output, $question);
 
-            $result = $this->processUserInput($prompt, $output, $conversation, $isQuiet);
+            $result = $this->processUserInput((string) $prompt, $output, $conversation, $isQuiet);
             if ('exit' === $result) {
                 return Command::SUCCESS;
             }

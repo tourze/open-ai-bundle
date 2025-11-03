@@ -41,6 +41,7 @@ class ConversationRepository extends ServiceEntityRepository
      */
     public function findLatestConversations(int $limit = 10): array
     {
+        /** @var array<Conversation> */
         return $this->createQueryBuilder('c')
             ->orderBy('c.createTime', 'DESC')
             ->setMaxResults($limit)
@@ -54,6 +55,7 @@ class ConversationRepository extends ServiceEntityRepository
      */
     public function findByTitleLike(string $title): array
     {
+        /** @var array<Conversation> */
         return $this->createQueryBuilder('c')
             ->andWhere('c.title LIKE :title')
             ->setParameter('title', '%' . $title . '%')

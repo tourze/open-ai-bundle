@@ -211,6 +211,9 @@ final class CharacterRepositoryTest extends AbstractRepositoryTestCase
         ;
 
         $this->assertCount(1, $result);
-        $this->assertSame('No Avatar Character', $result[0]->getName());
+        $this->assertIsArray($result);
+        /** @var Character $character */
+        $character = $result[0];
+        $this->assertSame('No Avatar Character', $character->getName());
     }
 }

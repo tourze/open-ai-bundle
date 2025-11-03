@@ -42,6 +42,7 @@ class MessageRepository extends ServiceEntityRepository
      */
     public function findByConversation(Conversation $conversation): array
     {
+        /** @var array<Message> */
         return $this->createQueryBuilder('m')
             ->andWhere('m.conversation = :conversation')
             ->setParameter('conversation', $conversation)
@@ -56,6 +57,7 @@ class MessageRepository extends ServiceEntityRepository
      */
     public function getConversationTokenCounts(Conversation $conversation): array
     {
+        /** @var array{prompt_tokens: string|int|null, completion_tokens: string|int|null, total_tokens: string|int|null} */
         $result = $this->createQueryBuilder('m')
             ->select(
                 'SUM(m.promptTokens) as prompt_tokens',
@@ -69,9 +71,9 @@ class MessageRepository extends ServiceEntityRepository
         ;
 
         return [
-            'prompt_tokens' => (int) $result['prompt_tokens'],
-            'completion_tokens' => (int) $result['completion_tokens'],
-            'total_tokens' => (int) $result['total_tokens'],
+            'prompt_tokens' => (int) ($result['prompt_tokens'] ?? 0),
+            'completion_tokens' => (int) ($result['completion_tokens'] ?? 0),
+            'total_tokens' => (int) ($result['total_tokens'] ?? 0),
         ];
     }
 
@@ -80,6 +82,7 @@ class MessageRepository extends ServiceEntityRepository
      */
     public function findByRole(Conversation $conversation, string $role): array
     {
+        /** @var array<Message> */
         return $this->createQueryBuilder('m')
             ->andWhere('m.conversation = :conversation')
             ->andWhere('m.role = :role')
@@ -96,6 +99,7 @@ class MessageRepository extends ServiceEntityRepository
      */
     public function findWithToolCalls(Conversation $conversation): array
     {
+        /** @var array<Message> */
         return $this->createQueryBuilder('m')
             ->andWhere('m.conversation = :conversation')
             ->andWhere('m.toolCalls IS NOT NULL')
@@ -106,8 +110,12 @@ class MessageRepository extends ServiceEntityRepository
         ;
     }
 
+    /**
+     * @return Message|null
+     */
     public function findByToolCallId(string $toolCallId): ?Message
     {
+        /** @var Message|null */
         return $this->createQueryBuilder('m')
             ->andWhere('m.toolCallId = :toolCallId')
             ->setParameter('toolCallId', $toolCallId)

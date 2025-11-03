@@ -43,6 +43,7 @@ class CharacterRepository extends ServiceEntityRepository
      */
     public function findAllActive(): array
     {
+        /** @var array<Character> */
         return $this->createQueryBuilder('c')
             ->where('c.valid = :valid')
             ->setParameter('valid', true)
@@ -53,9 +54,12 @@ class CharacterRepository extends ServiceEntityRepository
 
     /**
      * 根据名称查找角色
+     *
+     * @return Character|null
      */
     public function findOneByName(string $name): ?Character
     {
+        /** @var Character|null */
         return $this->createQueryBuilder('c')
             ->where('c.name = :name')
             ->setParameter('name', $name)

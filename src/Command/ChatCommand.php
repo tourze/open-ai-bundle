@@ -179,7 +179,7 @@ class ChatCommand extends Command
     }
 
     /**
-     * @param array<string, mixed> $tools
+     * @param array<int, array{type: string, function?: array<string, mixed>}> $tools
      */
     private function executeSinglePrompt(
         InputInterface $input,
@@ -214,7 +214,7 @@ class ChatCommand extends Command
     }
 
     /**
-     * @param array<string, mixed> $tools
+     * @param array<int, array{type: string, function?: array<string, mixed>}> $tools
      */
     private function executeConversation(
         InputInterface $input,

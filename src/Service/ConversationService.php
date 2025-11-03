@@ -123,7 +123,9 @@ class ConversationService
         // 附加 tool_calls
         if (null !== $choice->getToolCalls()) {
             foreach ($choice->getToolCalls() as $toolCall) {
-                $foundMessage->addToolCall($toolCall);
+                if (is_array($toolCall)) {
+                    $foundMessage->addToolCall($toolCall);
+                }
             }
         }
     }

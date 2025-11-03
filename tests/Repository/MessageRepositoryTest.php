@@ -316,7 +316,10 @@ final class MessageRepositoryTest extends AbstractRepositoryTestCase
         ;
 
         $this->assertCount(1, $result);
-        $this->assertSame('Message without tools', $result[0]->getContent());
+        $this->assertIsArray($result);
+        /** @var Message $message */
+        $message = $result[0];
+        $this->assertSame('Message without tools', $message->getContent());
     }
 
     public function testFindByConversationRelation(): void

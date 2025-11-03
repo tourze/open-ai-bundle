@@ -263,7 +263,10 @@ final class ConversationRepositoryTest extends AbstractRepositoryTestCase
         ;
 
         $this->assertCount(1, $result);
-        $this->assertSame('No Description Conversation', $result[0]->getTitle());
+        $this->assertIsArray($result);
+        /** @var Conversation $conversation */
+        $conversation = $result[0];
+        $this->assertSame('No Description Conversation', $conversation->getTitle());
     }
 
     public function testFindByActorRelation(): void
