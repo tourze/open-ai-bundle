@@ -9,6 +9,7 @@ use OpenAIBundle\Entity\ApiKey;
 use OpenAIBundle\Entity\Character;
 use OpenAIBundle\Enum\ContextLength;
 use OpenAIBundle\Repository\CharacterRepository;
+use PHPUnit\Framework\Attributes\Before;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Tourze\PHPUnitSymfonyWebTest\AbstractEasyAdminControllerTestCase;
@@ -20,6 +21,19 @@ use Tourze\PHPUnitSymfonyWebTest\AbstractEasyAdminControllerTestCase;
 #[RunTestsInSeparateProcesses]
 final class CharacterCrudControllerTest extends AbstractEasyAdminControllerTestCase
 {
+    #[Before]
+    protected function ensureAvatarUploadDirectory(): void
+    {
+        // 确保头像上传目录存在
+        $kernel = self::$kernel ?? self::bootKernel();
+        $projectDir = $kernel->getProjectDir();
+        $uploadDir = $projectDir . '/public/uploads/avatars';
+
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0o755, true);
+        }
+    }
+
     /** @return CharacterCrudController */
     protected function getControllerService(): CharacterCrudController
     {
@@ -69,16 +83,7 @@ final class CharacterCrudControllerTest extends AbstractEasyAdminControllerTestC
 
     public function testGetCharacterIndexPageReturnsSuccessful(): void
     {
-        $client = self::createClientWithDatabase();
-
-        // 创建上传目录
-        $uploadsDir = $client->getKernel()->getProjectDir() . '/public/uploads/avatars';
-        if (!is_dir($uploadsDir)) {
-            mkdir($uploadsDir, 0o777, true);
-        }
-
-        $this->createAdminUser('admin@test.com', 'admin123');
-        $this->loginAsAdmin($client, 'admin@test.com', 'admin123');
+        $client = $this->createAuthenticatedClient();
 
         $this->createTestCharacters();
 
@@ -93,9 +98,7 @@ final class CharacterCrudControllerTest extends AbstractEasyAdminControllerTestC
 
     public function testGetCharacterNewPageReturnsSuccessful(): void
     {
-        $client = self::createClientWithDatabase();
-        $this->createAdminUser('admin@test.com', 'admin123');
-        $this->loginAsAdmin($client, 'admin@test.com', 'admin123');
+        $client = $this->createAuthenticatedClient();
 
         $client->request('GET', '/admin/open-ai/character/new');
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
@@ -109,9 +112,7 @@ final class CharacterCrudControllerTest extends AbstractEasyAdminControllerTestC
 
     public function testCreateCharacterWithValidData(): void
     {
-        $client = self::createClientWithDatabase();
-        $this->createAdminUser('admin@test.com', 'admin123');
-        $this->loginAsAdmin($client, 'admin@test.com', 'admin123');
+        $client = $this->createAuthenticatedClient();
 
         $apiKey = $this->createTestApiKey();
 
@@ -144,9 +145,7 @@ final class CharacterCrudControllerTest extends AbstractEasyAdminControllerTestC
 
     public function testEditCharacterWithValidData(): void
     {
-        $client = self::createClientWithDatabase();
-        $this->createAdminUser('admin@test.com', 'admin123');
-        $this->loginAsAdmin($client, 'admin@test.com', 'admin123');
+        $client = $this->createAuthenticatedClient();
         $em = self::getEntityManager();
 
         $character = $this->createTestCharacters()[0];
@@ -179,9 +178,7 @@ final class CharacterCrudControllerTest extends AbstractEasyAdminControllerTestC
 
     public function testDetailCharacterPage(): void
     {
-        $client = self::createClientWithDatabase();
-        $this->createAdminUser('admin@test.com', 'admin123');
-        $this->loginAsAdmin($client, 'admin@test.com', 'admin123');
+        $client = $this->createAuthenticatedClient();
 
         $character = $this->createTestCharacters()[0];
 
@@ -196,9 +193,7 @@ final class CharacterCrudControllerTest extends AbstractEasyAdminControllerTestC
 
     public function testCreateCharacterWithMissingRequiredFields(): void
     {
-        $client = self::createClientWithDatabase();
-        $this->createAdminUser('admin@test.com', 'admin123');
-        $this->loginAsAdmin($client, 'admin@test.com', 'admin123');
+        $client = $this->createAuthenticatedClient();
 
         $client->request('POST', '/admin/open-ai/character/new', [
             'Character' => [
@@ -220,9 +215,7 @@ final class CharacterCrudControllerTest extends AbstractEasyAdminControllerTestC
 
     public function testCreateCharacterWithTooLongName(): void
     {
-        $client = self::createClientWithDatabase();
-        $this->createAdminUser('admin@test.com', 'admin123');
-        $this->loginAsAdmin($client, 'admin@test.com', 'admin123');
+        $client = $this->createAuthenticatedClient();
 
         $client->request('POST', '/admin/open-ai/character/new', [
             'Character' => [
@@ -244,9 +237,7 @@ final class CharacterCrudControllerTest extends AbstractEasyAdminControllerTestC
 
     public function testCreateCharacterWithInvalidTemperature(): void
     {
-        $client = self::createClientWithDatabase();
-        $this->createAdminUser('admin@test.com', 'admin123');
-        $this->loginAsAdmin($client, 'admin@test.com', 'admin123');
+        $client = $this->createAuthenticatedClient();
 
         $client->request('POST', '/admin/open-ai/character/new', [
             'Character' => [
@@ -268,9 +259,7 @@ final class CharacterCrudControllerTest extends AbstractEasyAdminControllerTestC
 
     public function testSearchCharactersByName(): void
     {
-        $client = self::createClientWithDatabase();
-        $this->createAdminUser('admin@test.com', 'admin123');
-        $this->loginAsAdmin($client, 'admin@test.com', 'admin123');
+        $client = $this->createAuthenticatedClient();
 
         $this->createTestCharacters();
 
@@ -284,9 +273,7 @@ final class CharacterCrudControllerTest extends AbstractEasyAdminControllerTestC
 
     public function testSearchCharactersByDescription(): void
     {
-        $client = self::createClientWithDatabase();
-        $this->createAdminUser('admin@test.com', 'admin123');
-        $this->loginAsAdmin($client, 'admin@test.com', 'admin123');
+        $client = $this->createAuthenticatedClient();
 
         $this->createTestCharacters();
 
@@ -299,13 +286,18 @@ final class CharacterCrudControllerTest extends AbstractEasyAdminControllerTestC
 
     public function testFilterCharactersByValidStatus(): void
     {
-        $client = self::createClientWithDatabase();
-        $this->createAdminUser('admin@test.com', 'admin123');
-        $this->loginAsAdmin($client, 'admin@test.com', 'admin123');
+        $client = $this->createAuthenticatedClient();
 
         $this->createTestCharacters();
 
-        $client->request('GET', '/admin/open-ai/character?filters[valid][comparison]=equal&filters[valid][value]=1');
+        $client->request('GET', '/admin/open-ai/character', [
+            'filters' => [
+                'valid' => [
+                    'comparison' => '=',
+                    'value' => 1,
+                ],
+            ],
+        ]);
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
         $content = $client->getResponse()->getContent();
         self::assertIsString($content);
@@ -314,14 +306,19 @@ final class CharacterCrudControllerTest extends AbstractEasyAdminControllerTestC
 
     public function testFilterCharactersByPreferredApiKey(): void
     {
-        $client = self::createClientWithDatabase();
-        $this->createAdminUser('admin@test.com', 'admin123');
-        $this->loginAsAdmin($client, 'admin@test.com', 'admin123');
+        $client = $this->createAuthenticatedClient();
 
         $apiKey = $this->createTestApiKey();
         $this->createTestCharacters();
 
-        $client->request('GET', sprintf('/admin/open-ai/character?filters[preferredApiKey][value]=%d&filters[preferredApiKey][comparison]=equal', $apiKey->getId()));
+        $client->request('GET', '/admin/open-ai/character', [
+            'filters' => [
+                'preferredApiKey' => [
+                    'comparison' => '=',
+                    'value' => $apiKey->getId(),
+                ],
+            ],
+        ]);
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
         $content = $client->getResponse()->getContent();
         self::assertIsString($content);
